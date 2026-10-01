@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>航天寶可夢大作戰</title>
+<title>航天寶可夢大戰</title>
 
 <style>
 *{
@@ -29,6 +29,43 @@ body{
     width:100vw;
     height:100vh;
     min-height:850px;
+}
+
+/* ==================== 記帳欄位 ==================== */
+
+.account-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 18px;
+    border:3px solid rgba(255,255,255,.9);
+    border-radius:18px;
+    background:rgba(25,25,25,.68);
+    color:#fff;
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+}
+
+.account-label{
+    font-size:17px;
+    font-weight:900;
+}
+
+.account-value{
+    min-width:110px;
+    font-size:24px;
+    font-weight:1000;
+    color:#ffd85b;
+    text-align:right;
+    text-shadow:0 2px 3px rgba(0,0,0,.7);
+}
+
+#gameAccountBox{
+    position:absolute;
+    top:20px;
+    left:20px;
+    z-index:40;
 }
 
 /* ==================== BOSS ==================== */
@@ -179,7 +216,7 @@ body{
     pointer-events:none;
 }
 
-/* 寶可夢 300×300px，向下 50px */
+/* 300×300px，向下 50px */
 #pokemonImg{
     display:none;
 
@@ -335,7 +372,7 @@ body{
     opacity:.7;
 }
 
-/* ==================== 訊息 ==================== */
+/* ==================== 系統訊息 ==================== */
 
 #message{
     position:absolute;
@@ -459,11 +496,73 @@ body{
     cursor:pointer;
 }
 
-/* ==================== 說明 ==================== */
+/* ==================== 伊布 / 可達鴨模式選擇 ==================== */
 
-#ruleModal{
-    background:rgba(0,0,0,.65);
+#choiceModal{
+    z-index:250;
 }
+
+.choice-box{
+    width:min(560px,92vw);
+    text-align:center;
+    background:rgba(255,255,255,.97);
+}
+
+.choice-pokemon-img{
+    width:170px !important;
+    height:170px !important;
+    object-fit:contain;
+    filter:drop-shadow(0 6px 7px rgba(0,0,0,.25));
+}
+
+.choice-description{
+    margin:0 0 22px;
+    font-size:17px;
+    line-height:1.7;
+    font-weight:800;
+    color:#444;
+}
+
+.choice-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.choice-btn{
+    min-height:100px;
+    border:3px solid #ddd;
+    border-radius:18px;
+    padding:15px;
+    cursor:pointer;
+    font-size:20px;
+    font-weight:1000;
+    transition:.2s;
+}
+
+.choice-btn small{
+    display:block;
+    margin-top:7px;
+    font-size:14px;
+    line-height:1.45;
+    font-weight:700;
+}
+
+.attack-choice{
+    background:#fff2e9;
+}
+
+.skill-choice{
+    background:#eef1ff;
+}
+
+.choice-btn:hover{
+    transform:translateY(-4px);
+    border-color:#ffd85b;
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+
+/* ==================== 說明 ==================== */
 
 #ruleModal .modal-box{
     width:auto;
@@ -499,6 +598,13 @@ body{
     background:url("store1.png") center/100% 100% no-repeat;
     border:none;
     box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
+
+#storeAccountBox{
+    position:absolute;
+    top:20px;
+    left:20px;
+    z-index:30;
 }
 
 .store-items{
@@ -540,6 +646,14 @@ body{
     color:#d56d00;
     font-size:20px;
     font-weight:1000;
+}
+
+.price-note{
+    min-height:20px;
+    margin-top:3px;
+    color:#bd3131;
+    font-size:12px;
+    font-weight:900;
 }
 
 /* ==================== 背包 ==================== */
@@ -589,6 +703,8 @@ body{
     font-weight:900;
 }
 
+/* ==================== 共用確認 ==================== */
+
 .use-item-btn{
     margin-top:9px;
     padding:10px 22px;
@@ -605,8 +721,6 @@ body{
     opacity:.4;
     cursor:not-allowed;
 }
-
-/* ==================== 確認 ==================== */
 
 .confirm-box{
     width:min(450px,90vw);
@@ -751,6 +865,14 @@ body{
         height:280px;
     }
 
+    #boss1Card{
+        transform:translateX(-50px);
+    }
+
+    #boss2Card{
+        transform:translateX(50px);
+    }
+
     .summon-zone{
         bottom:330px;
         width:700px;
@@ -804,6 +926,13 @@ body{
 
 <div id="game">
 
+    <!-- 左上記帳 -->
+    <div class="account-box" id="gameAccountBox">
+        <span class="account-label">累積消費</span>
+        <span class="account-value" id="gameExpense">$0</span>
+    </div>
+
+    <!-- BOSS -->
     <div class="boss-area">
 
         <div class="boss-card" id="boss1Card" data-boss="boss1">
@@ -814,21 +943,17 @@ body{
 
                 <div class="stat-row">
                     <span>HP</span>
-
                     <div class="bar">
                         <div id="boss1HpBar" class="fill hp-fill"></div>
                     </div>
-
                     <span id="boss1HpText">60 / 60</span>
                 </div>
 
                 <div class="stat-row">
                     <span>護甲</span>
-
                     <div class="bar">
                         <div id="boss1ArmorBar" class="fill armor-fill"></div>
                     </div>
-
                     <span id="boss1ArmorText">10 / 10</span>
                 </div>
 
@@ -847,21 +972,17 @@ body{
 
                 <div class="stat-row">
                     <span>HP</span>
-
                     <div class="bar">
                         <div id="boss2HpBar" class="fill hp-fill"></div>
                     </div>
-
                     <span id="boss2HpText">40 / 40</span>
                 </div>
 
                 <div class="stat-row">
                     <span>護甲</span>
-
                     <div class="bar">
                         <div id="boss2ArmorBar" class="fill armor-fill"></div>
                     </div>
-
                     <span id="boss2ArmorText">10 / 10</span>
                 </div>
 
@@ -879,6 +1000,7 @@ body{
     </div>
 
 
+    <!-- 左側 -->
     <div class="left-controls" id="leftControls">
 
         <button class="image-button" id="shieldBtn" type="button">
@@ -910,13 +1032,16 @@ body{
     </div>
 
 
+    <!-- 召喚 -->
     <div class="summon-zone">
 
         <div class="pokemon-display">
 
             <img id="pokemonImg" src="" alt="">
 
-            <div id="pokemonName">尚未召喚</div>
+            <div id="pokemonName">
+                尚未召喚
+            </div>
 
             <div id="pokemonEffect"></div>
 
@@ -929,6 +1054,7 @@ body{
     </div>
 
 
+    <!-- 右側 -->
     <div class="right-controls">
 
         <button class="image-button" id="bagBtn" type="button">
@@ -962,11 +1088,60 @@ body{
 </div>
 
 
-<!-- 說明 -->
+<!-- ==================== 伊布 / 可達鴨二選一 ==================== -->
+
+<div class="modal" id="choiceModal">
+
+    <div class="modal-box choice-box">
+
+        <img
+            id="choicePokemonImg"
+            class="choice-pokemon-img"
+            src=""
+            alt=""
+        >
+
+        <div class="modal-title" id="choiceTitle">
+            選擇本回合行動
+        </div>
+
+        <div class="choice-description" id="choiceDescription"></div>
+
+        <div class="choice-buttons">
+
+            <button
+                class="choice-btn attack-choice"
+                id="chooseAttackBtn"
+                type="button"
+            >
+                ⚔️ 施放攻擊
+                <small id="attackChoiceText"></small>
+            </button>
+
+            <button
+                class="choice-btn skill-choice"
+                id="chooseSkillBtn"
+                type="button"
+            >
+                ✨ 施放技能
+                <small>全體 BOSS 護甲歸 0<br>本回合不造成傷害</small>
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================== 說明 ==================== -->
+
 <div class="modal" id="ruleModal">
     <div class="modal-box">
 
-        <button class="close-btn" data-close="ruleModal" type="button">×</button>
+        <button class="close-btn" data-close="ruleModal" type="button">
+            ×
+        </button>
 
         <img class="rule-image" src="rule1.png" alt="遊戲說明">
 
@@ -974,58 +1149,80 @@ body{
 </div>
 
 
-<!-- 商店 -->
+<!-- ==================== 商店 ==================== -->
+
 <div class="modal" id="storeModal">
+
     <div class="modal-box">
 
-        <button class="close-btn" data-close="storeModal" type="button">×</button>
+        <button class="close-btn" data-close="storeModal" type="button">
+            ×
+        </button>
+
+        <!-- 商店左上記帳 -->
+        <div class="account-box" id="storeAccountBox">
+            <span class="account-label">累積消費</span>
+            <span class="account-value" id="storeExpense">$0</span>
+        </div>
 
         <div class="store-items">
 
             <div class="store-item" data-item="armor">
                 <img src="item1.png" alt="護甲修復劑">
                 <div class="store-item-name">護甲修復劑</div>
-                <div class="price">$1000</div>
+                <div class="price" id="armorPrice">$1000</div>
+                <div class="price-note" id="armorPriceNote"></div>
             </div>
 
             <div class="store-item" data-item="potion">
                 <img src="item2.png" alt="頂級生命藥水">
                 <div class="store-item-name">頂級生命藥水</div>
-                <div class="price">$1200</div>
+                <div class="price" id="potionPrice">$1200</div>
+                <div class="price-note" id="potionPriceNote"></div>
             </div>
 
             <div class="store-item" data-item="revive">
                 <img src="item3.png" alt="復活藥劑">
                 <div class="store-item-name">復活藥劑</div>
-                <div class="price">$1500</div>
+                <div class="price" id="revivePrice">$1500</div>
+                <div class="price-note" id="revivePriceNote"></div>
             </div>
 
             <div class="store-item" data-item="control">
                 <img src="item4.png" alt="控心術">
                 <div class="store-item-name">控心術</div>
-                <div class="price">$500</div>
+                <div class="price" id="controlPrice">$500</div>
+                <div class="price-note" id="controlPriceNote"></div>
             </div>
 
         </div>
 
     </div>
+
 </div>
 
 
-<!-- 背包 -->
+<!-- ==================== 背包 ==================== -->
+
 <div class="modal" id="bagModal">
+
     <div class="modal-box">
 
-        <button class="close-btn" data-close="bagModal" type="button">×</button>
+        <button class="close-btn" data-close="bagModal" type="button">
+            ×
+        </button>
 
         <div class="bag-items" id="bagItems"></div>
 
     </div>
+
 </div>
 
 
-<!-- 確認 -->
+<!-- ==================== 購買 / 使用確認 ==================== -->
+
 <div class="modal" id="confirmModal">
+
     <div class="modal-box confirm-box">
 
         <img id="confirmImg" src="" alt="">
@@ -1033,19 +1230,31 @@ body{
         <div class="confirm-text" id="confirmText"></div>
 
         <div class="confirm-actions">
-            <button class="yes" id="confirmYes" type="button">確認</button>
-            <button class="no" id="confirmNo" type="button">取消</button>
+
+            <button class="yes" id="confirmYes" type="button">
+                確認
+            </button>
+
+            <button class="no" id="confirmNo" type="button">
+                取消
+            </button>
+
         </div>
 
     </div>
+
 </div>
 
 
-<!-- 道具目標 -->
+<!-- ==================== 道具目標 ==================== -->
+
 <div class="modal" id="targetModal">
+
     <div class="modal-box confirm-box">
 
-        <div class="modal-title">選擇使用對象</div>
+        <div class="modal-title">
+            選擇使用對象
+        </div>
 
         <div class="target-buttons">
 
@@ -1061,18 +1270,25 @@ body{
 
         <div style="margin-top:20px">
 
-            <button class="no modal-action-btn" id="targetCancel" type="button">
+            <button
+                class="no modal-action-btn"
+                id="targetCancel"
+                type="button"
+            >
                 取消
             </button>
 
         </div>
 
     </div>
+
 </div>
 
 
-<!-- 護甲目標 -->
+<!-- ==================== 護甲目標 ==================== -->
+
 <div class="modal" id="shieldTargetModal">
+
     <div class="modal-box confirm-box">
 
         <img src="Shield.png" alt="護甲">
@@ -1114,11 +1330,14 @@ body{
         </div>
 
     </div>
+
 </div>
 
 
-<!-- 護甲確認 -->
+<!-- ==================== 護甲確認 ==================== -->
+
 <div class="modal" id="shieldConfirmModal">
+
     <div class="modal-box confirm-box">
 
         <img src="Shield.png" alt="護甲">
@@ -1138,11 +1357,14 @@ body{
         </div>
 
     </div>
+
 </div>
 
 
-<!-- 通關 -->
+<!-- ==================== 通關 ==================== -->
+
 <div class="modal" id="victory">
+
     <div class="modal-box victory-box">
 
         <div class="victory-title">
@@ -1154,12 +1376,15 @@ body{
         </div>
 
     </div>
+
 </div>
 
 
 <script>
 
-/* ==================== BOSS ==================== */
+/* =========================================================
+   BOSS
+========================================================= */
 
 const bosses = {
 
@@ -1182,11 +1407,14 @@ const bosses = {
 };
 
 
-/* ==================== 寶可夢 ==================== */
+/* =========================================================
+   寶可夢
+========================================================= */
 
 const pokemonList = [
 
     {
+        id:"p1",
         name:"甲賀忍蛙 + 象牙豬",
         img:"p1.png",
         boss1:3,
@@ -1195,6 +1423,7 @@ const pokemonList = [
     },
 
     {
+        id:"p2",
         name:"巨沼怪",
         img:"p2.png",
         boss1:2,
@@ -1203,6 +1432,7 @@ const pokemonList = [
     },
 
     {
+        id:"p3",
         name:"胡地",
         img:"p3.png",
         boss1:2,
@@ -1211,6 +1441,7 @@ const pokemonList = [
     },
 
     {
+        id:"p4",
         name:"路卡利歐 + 妙蛙種子",
         img:"p4.png",
         boss1:1,
@@ -1219,6 +1450,7 @@ const pokemonList = [
     },
 
     {
+        id:"p5",
         name:"怪力",
         img:"p5.png",
         boss1:1,
@@ -1227,6 +1459,7 @@ const pokemonList = [
     },
 
     {
+        id:"p6",
         name:"艾路雷朵",
         img:"p6.png",
         boss1:1,
@@ -1235,6 +1468,7 @@ const pokemonList = [
     },
 
     {
+        id:"p7",
         name:"超夢",
         img:"p7.png",
         boss1:2,
@@ -1243,6 +1477,7 @@ const pokemonList = [
     },
 
     {
+        id:"p8",
         name:"皮卡丘",
         img:"p8.png",
         boss1:1,
@@ -1251,26 +1486,41 @@ const pokemonList = [
         text:"群體攻擊｜全體 ×1"
     },
 
+    /*
+       伊布：
+       召喚後必須選擇
+       1. 攻擊
+       2. 技能：全體護甲歸 0
+    */
     {
+        id:"eevee",
         name:"伊布",
         img:"p9.png",
         boss1:1,
         boss2:1,
-        breakArmor:true,
-        text:"攻擊前使全體 BOSS 護甲歸 0"
+        specialChoice:true,
+        text:"攻擊 / 護甲歸零技能 二選一"
     },
 
+    /*
+       可達鴨：
+       召喚後必須選擇
+       1. 群體攻擊
+       2. 技能：全體護甲歸 0
+    */
     {
+        id:"psyduck",
         name:"可達鴨",
         img:"p10.png",
         boss1:1,
         boss2:1,
         multi:true,
-        breakArmor:true,
-        text:"群體 ×1｜攻擊前使全體護甲歸 0"
+        specialChoice:true,
+        text:"群體攻擊 / 護甲歸零技能 二選一"
     },
 
     {
+        id:"p11",
         name:"胖丁",
         img:"p11.png",
         boss1:1,
@@ -1282,7 +1532,9 @@ const pokemonList = [
 ];
 
 
-/* ==================== 道具 ==================== */
+/* =========================================================
+   道具
+========================================================= */
 
 const itemData = {
 
@@ -1297,14 +1549,14 @@ const itemData = {
         name:"頂級生命藥水",
         price:1200,
         img:"item2.png",
-        description:"選擇一隻存活 BOSS，恢復 10 HP，但不會超過目前 HP 上限。"
+        description:"選擇一隻存活 BOSS，恢復 10 HP，但不超過目前 HP 上限。"
     },
 
     revive:{
         name:"復活藥劑",
         price:1500,
         img:"item3.png",
-        description:"選擇一隻死亡 BOSS 復活。復活後 HP 為 10、HP 上限改為 10，護甲為 0，但護甲仍可補滿至 10。"
+        description:"復活死亡 BOSS。復活後 HP 10/10、護甲 0/10。"
     },
 
     control:{
@@ -1317,6 +1569,10 @@ const itemData = {
 };
 
 
+/* =========================================================
+   背包數量
+========================================================= */
+
 const inventory = {
     armor:0,
     potion:0,
@@ -1325,59 +1581,259 @@ const inventory = {
 };
 
 
-/* ==================== 狀態 ==================== */
+/*
+購買次數與背包數量分開。
+
+即使玩家使用掉道具，
+購買次數也不會減少。
+
+因此買過 5 個之後，
+第 6 個開始永遠使用 1.3 倍價格。
+*/
+const purchaseCounts = {
+    armor:0,
+    potion:0,
+    revive:0,
+    control:0
+};
+
+
+/* 累積消費 */
+let totalExpense = 0;
+
+
+/* =========================================================
+   遊戲狀態
+========================================================= */
 
 let currentPokemon = null;
 let selectedBoss = null;
+
 let summonedThisRound = false;
 let healPhase = false;
+
 let healBlocked = false;
 let jigglyBlockWaitingAttack = false;
+
 let pendingPurchase = null;
+let pendingPurchasePrice = 0;
+
 let pendingItemUse = null;
+
 let gameOver = false;
+
 let shieldTargetBoss = null;
 
 
-/* ==================== DOM ==================== */
+/*
+伊布 / 可達鴨本回合選擇：
 
-const summonBtn = document.getElementById("summonBtn");
-const attackBtn = document.getElementById("attackBtn");
-const healBtn = document.getElementById("healBtn");
-
-const damageInput = document.getElementById("damageInput");
-const healInput = document.getElementById("healInput");
-
-const pokemonImg = document.getElementById("pokemonImg");
-const pokemonName = document.getElementById("pokemonName");
-const pokemonEffect = document.getElementById("pokemonEffect");
-
-const message = document.getElementById("message");
-const leftControls = document.getElementById("leftControls");
-
-const confirmYes = document.getElementById("confirmYes");
+null     尚未選擇
+attack   使用攻擊
+skill    使用技能
+*/
+let specialAction = null;
 
 
-/* ==================== UI ==================== */
+/* =========================================================
+   DOM
+========================================================= */
+
+const summonBtn =
+    document.getElementById("summonBtn");
+
+const attackBtn =
+    document.getElementById("attackBtn");
+
+const healBtn =
+    document.getElementById("healBtn");
+
+const damageInput =
+    document.getElementById("damageInput");
+
+const healInput =
+    document.getElementById("healInput");
+
+const pokemonImg =
+    document.getElementById("pokemonImg");
+
+const pokemonName =
+    document.getElementById("pokemonName");
+
+const pokemonEffect =
+    document.getElementById("pokemonEffect");
+
+const message =
+    document.getElementById("message");
+
+const leftControls =
+    document.getElementById("leftControls");
+
+const confirmYes =
+    document.getElementById("confirmYes");
+
+
+/* =========================================================
+   金額格式
+========================================================= */
+
+function money(number){
+
+    return "$" +
+        Math.round(number)
+        .toLocaleString("zh-TW");
+
+}
+
+
+/* =========================================================
+   計算目前下一個道具的售價
+========================================================= */
+
+function getCurrentItemPrice(key){
+
+    const basePrice =
+        itemData[key].price;
+
+    /*
+       purchaseCounts = 已經買過的數量
+
+       0~4：
+       下一個是第1~5個
+       原價
+
+       >=5：
+       下一個是第6個以上
+       1.3倍
+    */
+    if(purchaseCounts[key] >= 5){
+
+        return Math.round(
+            basePrice * 1.3
+        );
+
+    }
+
+    return basePrice;
+
+}
+
+
+/* =========================================================
+   更新記帳
+========================================================= */
+
+function updateExpenseUI(){
+
+    document
+        .getElementById("gameExpense")
+        .textContent =
+        money(totalExpense);
+
+    document
+        .getElementById("storeExpense")
+        .textContent =
+        money(totalExpense);
+
+}
+
+
+/* =========================================================
+   更新商店售價
+========================================================= */
+
+function updateStorePrices(){
+
+    Object.keys(itemData)
+    .forEach(key=>{
+
+        const currentPrice =
+            getCurrentItemPrice(key);
+
+        const priceElement =
+            document.getElementById(
+                key + "Price"
+            );
+
+        const noteElement =
+            document.getElementById(
+                key + "PriceNote"
+            );
+
+        priceElement.textContent =
+            money(currentPrice);
+
+        /*
+           已經買滿5個：
+           下一個就是第6個
+        */
+        if(purchaseCounts[key] >= 5){
+
+            noteElement.textContent =
+                "第6個起｜原價 ×1.3";
+
+        }else{
+
+            const nextNumber =
+                purchaseCounts[key] + 1;
+
+            noteElement.textContent =
+                "目前購買第 " +
+                nextNumber +
+                " 個";
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   更新 BOSS
+========================================================= */
 
 function updateBossUI(){
 
-    Object.keys(bosses).forEach(key=>{
+    Object.keys(bosses)
+    .forEach(key=>{
 
-        const boss = bosses[key];
+        const boss =
+            bosses[key];
 
-        const card = document.getElementById(key+"Card");
-        const hpBar = document.getElementById(key+"HpBar");
-        const armorBar = document.getElementById(key+"ArmorBar");
-        const hpText = document.getElementById(key+"HpText");
-        const armorText = document.getElementById(key+"ArmorText");
+        const card =
+            document.getElementById(
+                key+"Card"
+            );
+
+        const hpBar =
+            document.getElementById(
+                key+"HpBar"
+            );
+
+        const armorBar =
+            document.getElementById(
+                key+"ArmorBar"
+            );
+
+        const hpText =
+            document.getElementById(
+                key+"HpText"
+            );
+
+        const armorText =
+            document.getElementById(
+                key+"ArmorText"
+            );
 
         hpBar.style.width =
             Math.max(
                 0,
                 Math.min(
                     100,
-                    boss.hp / boss.maxHp * 100
+                    boss.hp /
+                    boss.maxHp *
+                    100
                 )
             ) + "%";
 
@@ -1386,15 +1842,21 @@ function updateBossUI(){
                 0,
                 Math.min(
                     100,
-                    boss.armor / boss.maxArmor * 100
+                    boss.armor /
+                    boss.maxArmor *
+                    100
                 )
             ) + "%";
 
         hpText.textContent =
-            boss.hp + " / " + boss.maxHp;
+            boss.hp +
+            " / " +
+            boss.maxHp;
 
         armorText.textContent =
-            boss.armor + " / " + boss.maxArmor;
+            boss.armor +
+            " / " +
+            boss.maxArmor;
 
         card.classList.toggle(
             "dead",
@@ -1412,60 +1874,98 @@ function updateBossUI(){
 
 
 function setMessage(text){
+
     message.textContent = text;
+
 }
 
 
-/* ==================== 選 BOSS ==================== */
+/* =========================================================
+   選擇 BOSS
+========================================================= */
 
-document.querySelectorAll(".boss-card").forEach(card=>{
+document
+.querySelectorAll(".boss-card")
+.forEach(card=>{
 
-    card.addEventListener("click",()=>{
+    card.addEventListener(
+        "click",
+        ()=>{
 
-        if(gameOver) return;
+            if(gameOver)
+                return;
 
-        const key = card.dataset.boss;
+            const key =
+                card.dataset.boss;
 
-        if(bosses[key].hp <= 0){
+            if(bosses[key].hp <= 0){
 
-            setMessage(
-                bosses[key].name +
-                " 已死亡。復活需使用復活藥劑。"
-            );
+                setMessage(
+                    bosses[key].name +
+                    " 已死亡。復活需使用復活藥劑。"
+                );
 
-            return;
+                return;
+            }
+
+            selectedBoss = key;
+
+            updateBossUI();
+
+            if(healPhase){
+
+                setMessage(
+                    "已選擇 " +
+                    bosses[key].name +
+                    " 作為治療目標。"
+                );
+
+            }else if(
+                summonedThisRound
+            ){
+
+                /*
+                   如果伊布 / 可達鴨
+                   選擇的是技能，
+                   技能不需要攻擊目標。
+                */
+                if(
+                    currentPokemon &&
+                    currentPokemon.specialChoice &&
+                    specialAction === "skill"
+                ){
+
+                    setMessage(
+                        "本回合選擇施放技能，不需要指定攻擊目標。"
+                    );
+
+                }else{
+
+                    setMessage(
+                        "已鎖定攻擊目標：" +
+                        bosses[key].name
+                    );
+
+                }
+
+            }
+
         }
-
-        selectedBoss = key;
-
-        updateBossUI();
-
-        if(healPhase){
-
-            setMessage(
-                "已選擇 " +
-                bosses[key].name +
-                " 作為治療目標。"
-            );
-
-        }else if(summonedThisRound){
-
-            setMessage(
-                "已鎖定攻擊目標：" +
-                bosses[key].name
-            );
-        }
-
-    });
+    );
 
 });
 
 
-/* ==================== 召喚 ==================== */
+/* =========================================================
+   召喚
+========================================================= */
 
-function summonPokemon(forceDifferent=false){
+function summonPokemon(
+    forceDifferent=false
+){
 
-    if(gameOver) return;
+    if(gameOver)
+        return;
 
     let next;
 
@@ -1485,7 +1985,9 @@ function summonPokemon(forceDifferent=false){
                     )
                 ];
 
-        }while(next === currentPokemon);
+        }while(
+            next === currentPokemon
+        );
 
     }else{
 
@@ -1496,13 +1998,21 @@ function summonPokemon(forceDifferent=false){
                     pokemonList.length
                 )
             ];
+
     }
 
     currentPokemon = next;
 
-    pokemonImg.src = currentPokemon.img;
-    pokemonImg.alt = currentPokemon.name;
-    pokemonImg.style.display = "block";
+    specialAction = null;
+
+    pokemonImg.src =
+        currentPokemon.img;
+
+    pokemonImg.alt =
+        currentPokemon.name;
+
+    pokemonImg.style.display =
+        "block";
 
     pokemonName.textContent =
         currentPokemon.name;
@@ -1511,26 +2021,50 @@ function summonPokemon(forceDifferent=false){
         currentPokemon.text;
 
     summonedThisRound = true;
+
     healPhase = false;
+
     selectedBoss = null;
 
     summonBtn.disabled = true;
 
-    damageInput.disabled = false;
-    attackBtn.disabled = false;
-
     healInput.disabled = true;
     healBtn.disabled = true;
 
-    leftControls.classList.remove(
-        "heal-active"
-    );
+    leftControls
+        .classList
+        .remove("heal-active");
+
+
+    /*
+       伊布 / 可達鴨：
+       先禁止攻擊操作，
+       必須完成二選一。
+    */
+    if(currentPokemon.specialChoice){
+
+        damageInput.disabled = true;
+        attackBtn.disabled = true;
+
+        updateBossUI();
+
+        openSpecialChoice();
+
+        return;
+
+    }
+
+
+    /* 普通寶可夢 */
+    damageInput.disabled = false;
+    attackBtn.disabled = false;
 
     setMessage(
         "召喚成功！輸入傷害並選擇攻擊目標。"
     );
 
     updateBossUI();
+
 }
 
 
@@ -1540,7 +2074,169 @@ summonBtn.addEventListener(
 );
 
 
-/* ==================== 傷害 ==================== */
+/* =========================================================
+   伊布 / 可達鴨選擇視窗
+========================================================= */
+
+function openSpecialChoice(){
+
+    const img =
+        document.getElementById(
+            "choicePokemonImg"
+        );
+
+    const title =
+        document.getElementById(
+            "choiceTitle"
+        );
+
+    const description =
+        document.getElementById(
+            "choiceDescription"
+        );
+
+    const attackText =
+        document.getElementById(
+            "attackChoiceText"
+        );
+
+    img.src =
+        currentPokemon.img;
+
+    img.alt =
+        currentPokemon.name;
+
+    title.textContent =
+        currentPokemon.name +
+        "｜選擇本回合行動";
+
+
+    if(currentPokemon.id === "eevee"){
+
+        description.innerHTML =
+            "伊布本回合的<b>攻擊與技能只能擇一</b>。<br>" +
+            "選擇技能後，本回合不會造成攻擊傷害。";
+
+        attackText.innerHTML =
+            "選擇一隻 BOSS 攻擊<br>傷害倍率 ×1";
+
+    }
+
+    else if(
+        currentPokemon.id === "psyduck"
+    ){
+
+        description.innerHTML =
+            "可達鴨本回合的<b>攻擊與技能只能擇一</b>。<br>" +
+            "選擇技能後，本回合不會造成攻擊傷害。";
+
+        attackText.innerHTML =
+            "群體攻擊兩隻 BOSS<br>全體傷害倍率 ×1";
+
+    }
+
+    openModal(
+        "choiceModal"
+    );
+
+}
+
+
+/* ==================== 選攻擊 ==================== */
+
+document
+.getElementById("chooseAttackBtn")
+.addEventListener(
+    "click",
+    ()=>{
+
+        if(!currentPokemon)
+            return;
+
+        specialAction =
+            "attack";
+
+        closeModal(
+            "choiceModal"
+        );
+
+        damageInput.disabled =
+            false;
+
+        attackBtn.disabled =
+            false;
+
+        selectedBoss =
+            null;
+
+        updateBossUI();
+
+
+        if(
+            currentPokemon.id ===
+            "psyduck"
+        ){
+
+            setMessage(
+                "可達鴨本回合選擇【施放攻擊】！輸入傷害數值後，選擇任一存活 BOSS 再按攻擊。"
+            );
+
+        }else{
+
+            setMessage(
+                "伊布本回合選擇【施放攻擊】！請輸入傷害並選擇攻擊目標。"
+            );
+
+        }
+
+    }
+);
+
+
+/* ==================== 選技能 ==================== */
+
+document
+.getElementById("chooseSkillBtn")
+.addEventListener(
+    "click",
+    ()=>{
+
+        if(!currentPokemon)
+            return;
+
+        specialAction =
+            "skill";
+
+        closeModal(
+            "choiceModal"
+        );
+
+        /*
+           技能不需要輸入傷害。
+           攻擊按鈕變成這回合的
+           「施放技能」確認按鈕。
+        */
+        damageInput.value = "";
+        damageInput.disabled = true;
+
+        attackBtn.disabled = false;
+
+        selectedBoss = null;
+
+        updateBossUI();
+
+        setMessage(
+            currentPokemon.name +
+            " 本回合選擇【施放技能】！按下攻擊按鈕即可發動技能：全體 BOSS 護甲歸 0。"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   傷害
+========================================================= */
 
 function dealDamage(
     bossKey,
@@ -1548,19 +2244,23 @@ function dealDamage(
     multiplier
 ){
 
-    const boss = bosses[bossKey];
+    const boss =
+        bosses[bossKey];
 
-    if(boss.hp <= 0) return 0;
+    if(boss.hp <= 0)
+        return 0;
 
     let damage =
         Math.max(
             0,
             Math.round(
-                baseDamage * multiplier
+                baseDamage *
+                multiplier
             )
         );
 
-    const originalDamage = damage;
+    const originalDamage =
+        damage;
 
     /* 先扣護甲 */
     if(boss.armor > 0){
@@ -1571,8 +2271,12 @@ function dealDamage(
                 damage
             );
 
-        boss.armor -= armorDamage;
-        damage -= armorDamage;
+        boss.armor -=
+            armorDamage;
+
+        damage -=
+            armorDamage;
+
     }
 
     /* 再扣 HP */
@@ -1581,17 +2285,24 @@ function dealDamage(
         boss.hp =
             Math.max(
                 0,
-                boss.hp - damage
+                boss.hp -
+                damage
             );
+
     }
 
-    animateHit(bossKey);
+    animateHit(
+        bossKey
+    );
 
     return originalDamage;
+
 }
 
 
-/* ==================== 受傷動畫 ==================== */
+/* =========================================================
+   受傷動畫
+========================================================= */
 
 function animateHit(key){
 
@@ -1600,21 +2311,30 @@ function animateHit(key){
             key+"Card"
         );
 
-    card.classList.remove("hit");
+    card.classList.remove(
+        "hit"
+    );
 
     void card.offsetWidth;
 
-    card.classList.add("hit");
+    card.classList.add(
+        "hit"
+    );
 
     setTimeout(()=>{
 
-        card.classList.remove("hit");
+        card.classList.remove(
+            "hit"
+        );
 
     },450);
+
 }
 
 
-/* ==================== 攻擊 ==================== */
+/* =========================================================
+   攻擊 / 技能
+========================================================= */
 
 attackBtn.addEventListener(
     "click",
@@ -1624,7 +2344,8 @@ attackBtn.addEventListener(
 
 function attack(){
 
-    if(gameOver) return;
+    if(gameOver)
+        return;
 
     if(!currentPokemon){
 
@@ -1633,13 +2354,56 @@ function attack(){
         );
 
         return;
+
     }
 
+
+    /*
+       ============================
+       伊布 / 可達鴨：技能模式
+       ============================
+    */
+    if(
+        currentPokemon.specialChoice &&
+        specialAction === "skill"
+    ){
+
+        useArmorBreakSkill();
+
+        return;
+
+    }
+
+
+    /*
+       如果特殊寶可夢還沒選
+       攻擊或技能，不允許繼續。
+    */
+    if(
+        currentPokemon.specialChoice &&
+        !specialAction
+    ){
+
+        openSpecialChoice();
+
+        return;
+
+    }
+
+
+    /* ============================
+       一般攻擊
+       ============================ */
+
     const baseDamage =
-        Number(damageInput.value);
+        Number(
+            damageInput.value
+        );
 
     if(
-        !Number.isFinite(baseDamage) ||
+        !Number.isFinite(
+            baseDamage
+        ) ||
         baseDamage <= 0
     ){
 
@@ -1648,8 +2412,17 @@ function attack(){
         );
 
         return;
+
     }
 
+
+    /*
+       所有攻擊仍要求選一隻存活 BOSS。
+
+       可達鴨雖然是群體攻擊，
+       仍依原本遊戲操作先點一隻
+       BOSS 再按攻擊。
+    */
     if(!selectedBoss){
 
         setMessage(
@@ -1657,7 +2430,9 @@ function attack(){
         );
 
         return;
+
     }
+
 
     if(
         bosses[selectedBoss].hp <= 0
@@ -1668,17 +2443,15 @@ function attack(){
         );
 
         return;
+
     }
+
 
     const removingOldJigglyBlock =
         jigglyBlockWaitingAttack;
 
-    if(currentPokemon.breakArmor){
 
-        bosses.boss1.armor = 0;
-        bosses.boss2.armor = 0;
-    }
-
+    /* 群體攻擊 */
     if(currentPokemon.multi){
 
         dealDamage(
@@ -1698,68 +2471,204 @@ function attack(){
         dealDamage(
             selectedBoss,
             baseDamage,
-            currentPokemon[selectedBoss]
+            currentPokemon[
+                selectedBoss
+            ]
         );
+
     }
+
+
+    /*
+       上一回合胖丁封鎖：
+       必須等這次攻擊完成才解除。
+    */
+    if(
+        removingOldJigglyBlock
+    ){
+
+        healBlocked = false;
+
+        jigglyBlockWaitingAttack =
+            false;
+
+    }
+
+
+    /*
+       如果這回合是胖丁，
+       攻擊後重新套用封鎖。
+    */
+    if(
+        currentPokemon.disableHeal
+    ){
+
+        healBlocked = true;
+
+        jigglyBlockWaitingAttack =
+            true;
+
+    }
+
+
+    finishTurnAfterAction();
+
+}
+
+
+/* =========================================================
+   伊布 / 可達鴨技能
+========================================================= */
+
+function useArmorBreakSkill(){
+
+    const pokemonUsed =
+        currentPokemon.name;
+
+    const removingOldJigglyBlock =
+        jigglyBlockWaitingAttack;
+
+
+    /*
+       技能：
+       全體護甲直接歸 0。
+
+       不造成 HP 傷害。
+    */
+    bosses.boss1.armor = 0;
+    bosses.boss2.armor = 0;
+
+
+    /* 發光 / 震動提示 */
+    if(bosses.boss1.hp > 0){
+
+        animateHit("boss1");
+
+    }
+
+    if(bosses.boss2.hp > 0){
+
+        animateHit("boss2");
+
+    }
+
+
+    /*
+       這個技能視為完成本回合行動。
+
+       如果上一回合是胖丁，
+       此回合行動完成後解除封鎖。
+    */
+    if(
+        removingOldJigglyBlock
+    ){
+
+        healBlocked = false;
+
+        jigglyBlockWaitingAttack =
+            false;
+
+    }
+
 
     updateBossUI();
 
-    if(removingOldJigglyBlock){
+    finishTurnAfterAction(
+        pokemonUsed +
+        " 技能發動！全體 BOSS 護甲已歸 0！"
+    );
 
-        healBlocked = false;
-        jigglyBlockWaitingAttack = false;
-    }
+}
 
-    if(currentPokemon.disableHeal){
 
-        healBlocked = true;
-        jigglyBlockWaitingAttack = true;
-    }
+/* =========================================================
+   完成本回合
+========================================================= */
+
+function finishTurnAfterAction(
+    customMessage=""
+){
 
     damageInput.value = "";
     damageInput.disabled = true;
+
     attackBtn.disabled = true;
 
     summonedThisRound = false;
+
     summonBtn.disabled = false;
 
     selectedBoss = null;
+
     healPhase = true;
+
+    specialAction = null;
+
 
     if(healBlocked){
 
         healInput.disabled = true;
         healBtn.disabled = true;
 
-        leftControls.classList.remove(
-            "heal-active"
-        );
+        leftControls
+            .classList
+            .remove(
+                "heal-active"
+            );
 
-        setMessage(
-            "胖丁技能生效！補血與護甲修復暫時無效，直到下一回合攻擊完成。"
-        );
+        if(customMessage){
+
+            setMessage(
+                customMessage +
+                " 胖丁技能仍在影響中，補血與護甲修復暫時無效。"
+            );
+
+        }else{
+
+            setMessage(
+                "胖丁技能生效！補血與護甲修復暫時無效，直到下一回合行動完成。"
+            );
+
+        }
 
     }else{
 
         healInput.disabled = false;
         healBtn.disabled = false;
 
-        leftControls.classList.add(
-            "heal-active"
-        );
+        leftControls
+            .classList
+            .add(
+                "heal-active"
+            );
 
-        setMessage(
-            "攻擊完成！現在可選擇 BOSS 進行治療，或直接召喚進入下一回合。"
-        );
+        if(customMessage){
+
+            setMessage(
+                customMessage +
+                " 現在可進行治療，或直接召喚下一回合。"
+            );
+
+        }else{
+
+            setMessage(
+                "攻擊完成！現在可選擇 BOSS 進行治療，或直接召喚進入下一回合。"
+            );
+
+        }
+
     }
 
     updateBossUI();
 
     checkVictory();
+
 }
 
 
-/* ==================== 治療 ==================== */
+/* =========================================================
+   治療
+========================================================= */
 
 healBtn.addEventListener(
     "click",
@@ -1776,6 +2685,7 @@ function healBoss(){
         );
 
         return;
+
     }
 
     if(healBlocked){
@@ -1785,6 +2695,7 @@ function healBoss(){
         );
 
         return;
+
     }
 
     if(!selectedBoss){
@@ -1794,9 +2705,11 @@ function healBoss(){
         );
 
         return;
+
     }
 
-    const boss = bosses[selectedBoss];
+    const boss =
+        bosses[selectedBoss];
 
     if(boss.hp <= 0){
 
@@ -1805,10 +2718,13 @@ function healBoss(){
         );
 
         return;
+
     }
 
     const amount =
-        Number(healInput.value);
+        Number(
+            healInput.value
+        );
 
     if(
         !Number.isFinite(amount) ||
@@ -1820,26 +2736,28 @@ function healBoss(){
         );
 
         return;
+
     }
 
-    const before = boss.hp;
+    const before =
+        boss.hp;
 
-    /*
-        復活後 maxHp 已經變成 10，
-        因此普通治療也無法超過 10。
-    */
     boss.hp =
         Math.min(
             boss.maxHp,
-            boss.hp + Math.round(amount)
+            boss.hp +
+            Math.round(amount)
         );
 
     const healed =
-        boss.hp - before;
+        boss.hp -
+        before;
 
     healInput.value = "";
 
-    animateHeal(selectedBoss);
+    animateHeal(
+        selectedBoss
+    );
 
     updateBossUI();
 
@@ -1860,11 +2778,15 @@ function healBoss(){
             healed +
             " HP！"
         );
+
     }
+
 }
 
 
-/* ==================== 發光 ==================== */
+/* =========================================================
+   補血 / 護甲動畫
+========================================================= */
 
 function animateHeal(key){
 
@@ -1873,51 +2795,71 @@ function animateHeal(key){
             key+"Card"
         );
 
-    card.classList.remove("healing");
+    card.classList.remove(
+        "healing"
+    );
 
     void card.offsetWidth;
 
-    card.classList.add("healing");
+    card.classList.add(
+        "healing"
+    );
 
     setTimeout(()=>{
 
-        card.classList.remove("healing");
+        card.classList.remove(
+            "healing"
+        );
 
     },800);
+
 }
 
 
-/* ==================== 說明 ==================== */
+/* =========================================================
+   說明
+========================================================= */
 
 document
 .getElementById("ruleBtn")
-.addEventListener("click",()=>{
+.addEventListener(
+    "click",
+    ()=>{
 
-    openModal("ruleModal");
+        openModal(
+            "ruleModal"
+        );
 
-});
+    }
+);
 
 
-/* ==================== 護甲功能 ==================== */
+/* =========================================================
+   護甲技能
+========================================================= */
 
 document
 .getElementById("shieldBtn")
-.addEventListener("click",()=>{
+.addEventListener(
+    "click",
+    ()=>{
 
-    if(gameOver){
+        if(gameOver){
 
-        setMessage(
-            "遊戲已經通關。"
+            setMessage(
+                "遊戲已經通關。"
+            );
+
+            return;
+
+        }
+
+        openModal(
+            "shieldTargetModal"
         );
 
-        return;
     }
-
-    openModal(
-        "shieldTargetModal"
-    );
-
-});
+);
 
 
 document
@@ -1931,7 +2873,8 @@ document
         ()=>{
 
             const bossKey =
-                btn.dataset.shieldTarget;
+                btn.dataset
+                .shieldTarget;
 
             const boss =
                 bosses[bossKey];
@@ -1948,6 +2891,7 @@ document
                 );
 
                 return;
+
             }
 
             if(
@@ -1965,6 +2909,7 @@ document
                 );
 
                 return;
+
             }
 
             shieldTargetBoss =
@@ -1975,10 +2920,10 @@ document
             );
 
             document
-                .getElementById(
-                    "shieldConfirmText"
-                )
-                .innerHTML =
+            .getElementById(
+                "shieldConfirmText"
+            )
+            .innerHTML =
 
                 "確定要替 <b>" +
                 boss.name +
@@ -2026,13 +2971,15 @@ document
                 "shieldConfirmModal"
             );
 
-            shieldTargetBoss = null;
+            shieldTargetBoss =
+                null;
 
             setMessage(
                 "此 BOSS 已死亡，無法補充護甲。"
             );
 
             return;
+
         }
 
         if(healBlocked){
@@ -2041,19 +2988,17 @@ document
                 "shieldConfirmModal"
             );
 
-            shieldTargetBoss = null;
+            shieldTargetBoss =
+                null;
 
             setMessage(
                 "胖丁技能影響中，護甲補充暫時無效！"
             );
 
             return;
+
         }
 
-        /*
-            復活後 maxArmor 不會改變，
-            因此仍然可以補回 10 / 10。
-        */
         boss.armor =
             boss.maxArmor;
 
@@ -2074,7 +3019,8 @@ document
             "shieldConfirmModal"
         );
 
-        shieldTargetBoss = null;
+        shieldTargetBoss =
+            null;
 
     }
 );
@@ -2088,7 +3034,8 @@ document
     "click",
     ()=>{
 
-        shieldTargetBoss = null;
+        shieldTargetBoss =
+            null;
 
         closeModal(
             "shieldConfirmModal"
@@ -2106,7 +3053,8 @@ document
     "click",
     ()=>{
 
-        shieldTargetBoss = null;
+        shieldTargetBoss =
+            null;
 
         closeModal(
             "shieldTargetModal"
@@ -2116,64 +3064,113 @@ document
 );
 
 
-/* ==================== 商店 ==================== */
+/* =========================================================
+   商店
+========================================================= */
 
 document
 .getElementById("storeBtn")
-.addEventListener("click",()=>{
+.addEventListener(
+    "click",
+    ()=>{
 
-    openModal("storeModal");
+        updateStorePrices();
+        updateExpenseUI();
 
-});
+        openModal(
+            "storeModal"
+        );
+
+    }
+);
 
 
 document
-.querySelectorAll(".store-item")
+.querySelectorAll(
+    ".store-item"
+)
 .forEach(el=>{
 
-    el.addEventListener("click",()=>{
+    el.addEventListener(
+        "click",
+        ()=>{
 
-        const key =
-            el.dataset.item;
+            const key =
+                el.dataset.item;
 
-        const item =
-            itemData[key];
+            const item =
+                itemData[key];
 
-        pendingPurchase = key;
-        pendingItemUse = null;
+            /*
+               購買當下重新取得價格，
+               避免畫面與實際扣款不同。
+            */
+            const currentPrice =
+                getCurrentItemPrice(
+                    key
+                );
 
-        confirmYes.dataset.mode =
-            "purchase";
+            pendingPurchase =
+                key;
 
-        document
+            pendingPurchasePrice =
+                currentPrice;
+
+            pendingItemUse =
+                null;
+
+            confirmYes.dataset.mode =
+                "purchase";
+
+            document
             .getElementById(
                 "confirmImg"
             )
             .src =
                 item.img;
 
-        document
+            let priceNotice = "";
+
+            if(
+                purchaseCounts[key] >= 5
+            ){
+
+                priceNotice =
+                    "<br><span style='color:#c73535;font-size:15px;'>第6個起價格為原價 ×1.3</span>";
+
+            }
+
+            document
             .getElementById(
                 "confirmText"
             )
             .innerHTML =
 
-            "確定購買 <b>" +
-            item.name +
-            "</b> 嗎？<br>" +
-            "價格：$" +
-            item.price;
+                "確定購買 <b>" +
+                item.name +
+                "</b> 嗎？" +
 
-        openModal(
-            "confirmModal"
-        );
+                "<br>本次價格：" +
+                money(currentPrice) +
 
-    });
+                priceNotice +
+
+                "<br><br>目前累積消費：" +
+                money(totalExpense);
+
+            openModal(
+                "confirmModal"
+            );
+
+        }
+    );
 
 });
 
 
-/* ==================== 確認 ==================== */
+/* =========================================================
+   購買 / 使用確認
+========================================================= */
 
 confirmYes.addEventListener(
     "click",
@@ -2182,7 +3179,14 @@ confirmYes.addEventListener(
         const mode =
             confirmYes.dataset.mode;
 
-        if(mode === "purchase"){
+
+        /* ====================
+           購買
+        ==================== */
+
+        if(
+            mode === "purchase"
+        ){
 
             if(!pendingPurchase)
                 return;
@@ -2193,27 +3197,68 @@ confirmYes.addEventListener(
             const item =
                 itemData[key];
 
+            /*
+               再確認一次售價。
+               正常情況會與確認視窗相同。
+            */
+            const actualPrice =
+                getCurrentItemPrice(
+                    key
+                );
+
+
+            /* 道具進背包 */
             inventory[key]++;
 
-            pendingPurchase = null;
+
+            /* 購買數量 +1 */
+            purchaseCounts[key]++;
+
+
+            /* 記帳累加 */
+            totalExpense +=
+                actualPrice;
+
+
+            pendingPurchase =
+                null;
+
+            pendingPurchasePrice =
+                0;
 
             confirmYes.dataset.mode =
                 "";
+
 
             closeModal(
                 "confirmModal"
             );
 
+
             renderBag();
+
+            updateStorePrices();
+
+            updateExpenseUI();
+
 
             setMessage(
                 "已購買 " +
                 item.name +
-                "，道具已放入背包！"
+                "｜本次消費 " +
+                money(actualPrice) +
+                "｜累積消費 " +
+                money(totalExpense)
             );
 
             return;
+
         }
+
+
+        /* ====================
+           使用道具
+        ==================== */
 
         if(mode === "item"){
 
@@ -2227,18 +3272,24 @@ confirmYes.addEventListener(
             confirmYes.dataset.mode =
                 "";
 
-            if(!key) return;
+            if(!key)
+                return;
 
             if(key === "control"){
 
-                pendingItemUse = null;
+                pendingItemUse =
+                    null;
 
                 useControlItem();
 
                 return;
+
             }
 
-            openTargetSelection(key);
+            openTargetSelection(
+                key
+            );
+
         }
 
     }
@@ -2246,32 +3297,51 @@ confirmYes.addEventListener(
 
 
 document
-.getElementById("confirmNo")
-.addEventListener("click",()=>{
+.getElementById(
+    "confirmNo"
+)
+.addEventListener(
+    "click",
+    ()=>{
 
-    pendingPurchase = null;
-    pendingItemUse = null;
+        pendingPurchase =
+            null;
 
-    confirmYes.dataset.mode = "";
+        pendingPurchasePrice =
+            0;
 
-    closeModal(
-        "confirmModal"
-    );
+        pendingItemUse =
+            null;
 
-});
+        confirmYes.dataset.mode =
+            "";
+
+        closeModal(
+            "confirmModal"
+        );
+
+    }
+);
 
 
-/* ==================== 背包 ==================== */
+/* =========================================================
+   背包
+========================================================= */
 
 document
 .getElementById("bagBtn")
-.addEventListener("click",()=>{
+.addEventListener(
+    "click",
+    ()=>{
 
-    renderBag();
+        renderBag();
 
-    openModal("bagModal");
+        openModal(
+            "bagModal"
+        );
 
-});
+    }
+);
 
 
 function renderBag(){
@@ -2322,6 +3392,7 @@ function renderBag(){
             >
                 使用
             </button>
+
         `;
 
         container.appendChild(
@@ -2330,33 +3401,38 @@ function renderBag(){
 
     });
 
+
     container
-        .querySelectorAll(
-            "[data-use]"
-        )
-        .forEach(btn=>{
+    .querySelectorAll(
+        "[data-use]"
+    )
+    .forEach(btn=>{
 
-            btn.addEventListener(
-                "click",
-                ()=>{
+        btn.addEventListener(
+            "click",
+            ()=>{
 
-                    requestUseItem(
-                        btn.dataset.use
-                    );
+                requestUseItem(
+                    btn.dataset.use
+                );
 
-                }
-            );
+            }
+        );
 
-        });
+    });
 
 }
 
 
-/* ==================== 使用道具 ==================== */
+/* =========================================================
+   要求使用道具
+========================================================= */
 
 function requestUseItem(key){
 
-    if(inventory[key] <= 0)
+    if(
+        inventory[key] <= 0
+    )
         return;
 
     const item =
@@ -2376,26 +3452,30 @@ function requestUseItem(key){
         );
 
         return;
+
     }
 
-    pendingItemUse = key;
-    pendingPurchase = null;
+    pendingItemUse =
+        key;
+
+    pendingPurchase =
+        null;
 
     confirmYes.dataset.mode =
         "item";
 
     document
-        .getElementById(
-            "confirmImg"
-        )
-        .src =
-            item.img;
+    .getElementById(
+        "confirmImg"
+    )
+    .src =
+        item.img;
 
     document
-        .getElementById(
-            "confirmText"
-        )
-        .innerHTML =
+    .getElementById(
+        "confirmText"
+    )
+    .innerHTML =
 
         "確定使用 <b>" +
         item.name +
@@ -2452,7 +3532,8 @@ document
     "click",
     ()=>{
 
-        pendingItemUse = null;
+        pendingItemUse =
+            null;
 
         closeModal(
             "targetModal"
@@ -2462,7 +3543,9 @@ document
 );
 
 
-/* ==================== 道具效果 ==================== */
+/* =========================================================
+   道具效果
+========================================================= */
 
 function useItemOnBoss(
     itemKey,
@@ -2475,9 +3558,10 @@ function useItemOnBoss(
     const boss =
         bosses[bossKey];
 
+
     /* ====================
        護甲修復劑
-       ==================== */
+    ==================== */
 
     if(itemKey === "armor"){
 
@@ -2487,13 +3571,15 @@ function useItemOnBoss(
                 "targetModal"
             );
 
-            pendingItemUse = null;
+            pendingItemUse =
+                null;
 
             setMessage(
                 "胖丁技能影響中，護甲修復暫時無效！道具未消耗。"
             );
 
             return;
+
         }
 
         if(boss.hp <= 0){
@@ -2503,6 +3589,7 @@ function useItemOnBoss(
             );
 
             return;
+
         }
 
         if(
@@ -2516,18 +3603,17 @@ function useItemOnBoss(
             );
 
             return;
+
         }
 
-        /*
-            即使 BOSS 曾被復活，
-            maxArmor 仍然是 10。
-        */
         boss.armor =
             boss.maxArmor;
 
         inventory.armor--;
 
-        animateHeal(bossKey);
+        animateHeal(
+            bossKey
+        );
 
         setMessage(
             boss.name +
@@ -2540,10 +3626,12 @@ function useItemOnBoss(
 
 
     /* ====================
-       頂級生命藥水
-       ==================== */
+       生命藥水
+    ==================== */
 
-    else if(itemKey === "potion"){
+    else if(
+        itemKey === "potion"
+    ){
 
         if(healBlocked){
 
@@ -2551,13 +3639,15 @@ function useItemOnBoss(
                 "targetModal"
             );
 
-            pendingItemUse = null;
+            pendingItemUse =
+                null;
 
             setMessage(
                 "胖丁技能影響中，補血道具暫時無效！道具未消耗。"
             );
 
             return;
+
         }
 
         if(boss.hp <= 0){
@@ -2567,6 +3657,7 @@ function useItemOnBoss(
             );
 
             return;
+
         }
 
         if(
@@ -2582,16 +3673,12 @@ function useItemOnBoss(
             );
 
             return;
+
         }
 
         const before =
             boss.hp;
 
-        /*
-            如果 BOSS 已被復活，
-            maxHp 會是 10，
-            因此藥水也不能補超過 10。
-        */
         boss.hp =
             Math.min(
                 boss.maxHp,
@@ -2599,11 +3686,14 @@ function useItemOnBoss(
             );
 
         const healed =
-            boss.hp - before;
+            boss.hp -
+            before;
 
         inventory.potion--;
 
-        animateHeal(bossKey);
+        animateHeal(
+            bossKey
+        );
 
         setMessage(
             boss.name +
@@ -2617,9 +3707,11 @@ function useItemOnBoss(
 
     /* ====================
        復活藥劑
-       ==================== */
+    ==================== */
 
-    else if(itemKey === "revive"){
+    else if(
+        itemKey === "revive"
+    ){
 
         if(boss.hp > 0){
 
@@ -2628,34 +3720,30 @@ function useItemOnBoss(
             );
 
             return;
+
         }
 
         /*
-            ★ 新復活規則 ★
+           復活後：
 
-            復活後：
-            HP = 10
-            HP 上限 = 10
-            護甲 = 0
-            護甲上限仍維持 10
+           HP 10 / 10
+           護甲 0 / 10
 
-            所以之後：
-            治療最高只能到 10 HP
-            護甲則可以重新補到 10
+           HP 上限改為10
+           護甲上限仍為10
         */
-
         boss.maxHp = 10;
         boss.hp = 10;
 
         boss.armor = 0;
 
-        /* 不修改 boss.maxArmor */
-
         inventory.revive--;
 
         gameOver = false;
 
-        animateHeal(bossKey);
+        animateHeal(
+            bossKey
+        );
 
         setMessage(
             boss.name +
@@ -2675,12 +3763,15 @@ function useItemOnBoss(
         "targetModal"
     );
 
-    pendingItemUse = null;
+    pendingItemUse =
+        null;
 
 }
 
 
-/* ==================== 控心術 ==================== */
+/* =========================================================
+   控心術
+========================================================= */
 
 function useControlItem(){
 
@@ -2696,30 +3787,47 @@ function useControlItem(){
         );
 
         return;
+
     }
 
     inventory.control--;
 
+    /*
+       重新召喚時，
+       如果重新抽到伊布 / 可達鴨，
+       也會重新跳出攻擊/技能選擇。
+    */
     summonPokemon(true);
 
-    summonBtn.disabled = true;
+    summonBtn.disabled =
+        true;
 
     renderBag();
 
-    setMessage(
-        "控心術發動！已重新召喚出場寶可夢！"
-    );
+    if(
+        !currentPokemon.specialChoice
+    ){
+
+        setMessage(
+            "控心術發動！已重新召喚出場寶可夢！"
+        );
+
+    }
 
 }
 
 
-/* ==================== MODAL ==================== */
+/* =========================================================
+   MODAL
+========================================================= */
 
 function openModal(id){
 
     document
-        .getElementById(id)
-        .classList.add("show");
+    .getElementById(id)
+    .classList.add(
+        "show"
+    );
 
 }
 
@@ -2727,14 +3835,18 @@ function openModal(id){
 function closeModal(id){
 
     document
-        .getElementById(id)
-        .classList.remove("show");
+    .getElementById(id)
+    .classList.remove(
+        "show"
+    );
 
 }
 
 
 document
-.querySelectorAll("[data-close]")
+.querySelectorAll(
+    "[data-close]"
+)
 .forEach(btn=>{
 
     btn.addEventListener(
@@ -2751,6 +3863,11 @@ document
 });
 
 
+/*
+伊布 / 可達鴨選擇視窗
+刻意不能點背景關閉，
+避免跳過二選一。
+*/
 document
 .querySelectorAll(
     "#ruleModal,#storeModal,#bagModal"
@@ -2761,7 +3878,9 @@ document
         "click",
         e=>{
 
-            if(e.target === modal){
+            if(
+                e.target === modal
+            ){
 
                 modal.classList.remove(
                     "show"
@@ -2775,7 +3894,9 @@ document
 });
 
 
-/* ==================== 通關 ==================== */
+/* =========================================================
+   通關
+========================================================= */
 
 function checkVictory(){
 
@@ -2786,14 +3907,24 @@ function checkVictory(){
 
         gameOver = true;
 
-        summonBtn.disabled = true;
-        attackBtn.disabled = true;
-        damageInput.disabled = true;
+        summonBtn.disabled =
+            true;
 
-        healBtn.disabled = true;
-        healInput.disabled = true;
+        attackBtn.disabled =
+            true;
 
-        leftControls.classList.remove(
+        damageInput.disabled =
+            true;
+
+        healBtn.disabled =
+            true;
+
+        healInput.disabled =
+            true;
+
+        leftControls
+        .classList
+        .remove(
             "heal-active"
         );
 
@@ -2806,11 +3937,15 @@ function checkVictory(){
             createConfetti();
 
         },600);
+
     }
+
 }
 
 
-/* ==================== 彩帶 ==================== */
+/* =========================================================
+   彩帶
+========================================================= */
 
 function createConfetti(){
 
@@ -2823,7 +3958,11 @@ function createConfetti(){
         "#ff983d"
     ];
 
-    for(let i=0;i<120;i++){
+    for(
+        let i=0;
+        i<120;
+        i++
+    ){
 
         const piece =
             document.createElement(
@@ -2865,14 +4004,23 @@ function createConfetti(){
             piece.remove();
 
         },6500);
+
     }
+
 }
 
 
-/* ==================== 初始化 ==================== */
+/* =========================================================
+   初始化
+========================================================= */
 
 updateBossUI();
+
 renderBag();
+
+updateExpenseUI();
+
+updateStorePrices();
 
 </script>
 
