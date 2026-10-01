@@ -505,7 +505,16 @@ body{
 .choice-box{
     width:min(560px,92vw);
     text-align:center;
-    background:rgba(255,255,255,.97);
+
+    /* 淺灰色背景，透明度 75% */
+    background:rgba(220,220,220,.75);
+
+    /* 讓透明視窗後方有輕微模糊效果 */
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+
+    border:2px solid rgba(255,255,255,.55);
+    box-shadow:0 12px 40px rgba(0,0,0,.3);
 }
 
 .choice-pokemon-img{
