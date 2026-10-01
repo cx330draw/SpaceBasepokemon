@@ -1,0 +1,2880 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雙 Boss 寶可夢大作戰</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    user-select:none;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    font-family:"Microsoft JhengHei",Arial,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    overflow:hidden;
+    background:url("back.png") center/cover no-repeat fixed;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    min-height:850px;
+}
+
+/* ==================== BOSS ==================== */
+
+.boss-area{
+    position:absolute;
+    top:15px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(1000px,80vw);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:80px;
+}
+
+.boss-card{
+    position:relative;
+    text-align:center;
+    padding:0 20px 20px;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    transition:filter .2s;
+}
+
+#boss1Card{
+    transform:translateX(-100px);
+}
+
+#boss2Card{
+    transform:translateX(100px);
+}
+
+#boss1Card:hover{
+    cursor:pointer;
+    transform:translateX(-100px) translateY(-4px);
+}
+
+#boss2Card:hover{
+    cursor:pointer;
+    transform:translateX(100px) translateY(-4px);
+}
+
+.boss-card.selected{
+    outline:none;
+}
+
+.boss-card.selected .boss-img{
+    filter:
+        drop-shadow(0 0 8px #ffd85b)
+        drop-shadow(0 0 18px #ffd85b)
+        drop-shadow(0 8px 5px rgba(0,0,0,.3));
+}
+
+.boss-img{
+    width:340px;
+    height:340px;
+    object-fit:contain;
+    filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));
+    transition:filter .2s;
+}
+
+.boss-card.dead{
+    filter:grayscale(1);
+    opacity:.5;
+}
+
+.dead-label{
+    display:none;
+    position:absolute;
+    left:50%;
+    top:130px;
+    transform:translateX(-50%);
+    font-size:52px;
+    font-weight:1000;
+    color:#fff;
+    text-shadow:
+        0 3px 4px #000,
+        0 0 15px #000;
+    pointer-events:none;
+}
+
+.boss-card.dead .dead-label{
+    display:block;
+}
+
+/* ==================== HP / ARMOR ==================== */
+
+.stats{
+    width:100%;
+    margin-top:-20px;
+}
+
+.stat-row{
+    display:grid;
+    grid-template-columns:65px 1fr 85px;
+    align-items:center;
+    gap:8px;
+    margin-top:9px;
+    font-size:17px;
+    font-weight:900;
+    color:#fff;
+    text-shadow:
+        0 2px 3px #000,
+        0 0 4px #000;
+}
+
+.bar{
+    height:23px;
+    background:rgba(30,30,30,.65);
+    border:2px solid rgba(255,255,255,.85);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 2px 5px rgba(0,0,0,.35);
+}
+
+.fill{
+    height:100%;
+    width:100%;
+    transition:width .35s ease;
+}
+
+.hp-fill{
+    background:linear-gradient(90deg,#ff4545,#ff7a68);
+}
+
+.armor-fill{
+    background:linear-gradient(90deg,#4b9fff,#8ed7ff);
+}
+
+/* ==================== 召喚區 ==================== */
+
+.summon-zone{
+    position:absolute;
+    left:50%;
+    bottom:15px;
+    transform:translateX(-50%);
+    width:900px;
+    text-align:center;
+}
+
+.pokemon-display{
+    height:380px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    pointer-events:none;
+}
+
+/* 寶可夢 300×300px，向下 50px */
+#pokemonImg{
+    display:none;
+
+    width:300px;
+    height:300px;
+
+    min-width:300px;
+    min-height:300px;
+
+    max-width:300px;
+    max-height:300px;
+
+    object-fit:contain;
+    flex-shrink:0;
+
+    transform:translateY(50px);
+
+    filter:drop-shadow(0 8px 6px rgba(0,0,0,.35));
+}
+
+#pokemonName{
+    min-height:36px;
+    margin-top:4px;
+    padding:5px 15px;
+    font-size:22px;
+    font-weight:900;
+    color:#fff;
+    text-shadow:
+        0 2px 3px #000,
+        0 0 8px #000;
+}
+
+#pokemonEffect{
+    min-height:26px;
+    font-size:15px;
+    font-weight:900;
+    color:#fff7a7;
+    text-shadow:0 2px 3px #000;
+}
+
+/* ==================== 圖片按鈕 ==================== */
+
+.image-button{
+    border:0;
+    background:none;
+    padding:0;
+    cursor:pointer;
+    transition:transform .15s,filter .15s;
+}
+
+.image-button img{
+    display:block;
+    object-fit:contain;
+}
+
+.image-button:hover:not(:disabled){
+    transform:scale(1.04);
+    filter:brightness(1.08);
+}
+
+.image-button:active:not(:disabled){
+    transform:scale(.96);
+}
+
+.image-button:disabled{
+    cursor:not-allowed;
+    filter:grayscale(.8) brightness(.7);
+    opacity:.55;
+}
+
+#summonBtn img{
+    width:300px;
+    max-height:180px;
+}
+
+#shieldBtn img,
+#ruleBtn img{
+    width:250px;
+    max-height:145px;
+}
+
+#healBtn img{
+    width:250px;
+    max-height:150px;
+}
+
+#bagBtn img,
+#storeBtn img{
+    width:250px;
+    max-height:145px;
+}
+
+#attackBtn img{
+    width:260px;
+    max-height:160px;
+}
+
+/* ==================== 左右控制 ==================== */
+
+.left-controls{
+    position:absolute;
+    left:20px;
+    bottom:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:5px;
+}
+
+.heal-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.right-controls{
+    position:absolute;
+    right:20px;
+    bottom:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:5px;
+}
+
+.attack-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+/* ==================== INPUT ==================== */
+
+.number-input{
+    width:300px;
+    height:95px;
+    border:5px solid #fff;
+    border-radius:20px;
+    outline:none;
+    background:rgba(255,255,255,.92);
+    box-shadow:0 5px 18px rgba(0,0,0,.3);
+    font-size:32px;
+    font-weight:900;
+    text-align:center;
+}
+
+.number-input:focus{
+    border-color:#ffd85b;
+}
+
+.number-input:disabled{
+    background:rgba(150,150,150,.85);
+    opacity:.7;
+}
+
+/* ==================== 訊息 ==================== */
+
+#message{
+    position:absolute;
+    left:50%;
+    top:390px;
+    transform:translateX(-50%);
+    min-width:350px;
+    max-width:650px;
+    padding:10px 20px;
+    text-align:center;
+    color:#fff;
+    font-size:17px;
+    font-weight:900;
+    background:rgba(0,0,0,.52);
+    border:2px solid rgba(255,255,255,.55);
+    border-radius:20px;
+    pointer-events:none;
+    z-index:20;
+}
+
+/* ==================== 動畫 ==================== */
+
+.left-controls.heal-active .heal-row{
+    animation:healReady 1s infinite alternate;
+}
+
+@keyframes healReady{
+    from{filter:drop-shadow(0 0 2px #fff);}
+    to{filter:drop-shadow(0 0 18px #73ff98);}
+}
+
+#boss1Card.hit{
+    animation:boss1Hit .38s ease;
+}
+
+@keyframes boss1Hit{
+    0%{transform:translateX(-100px);}
+    18%{transform:translateX(-115px) rotate(-1deg);}
+    36%{transform:translateX(-85px) rotate(1deg);}
+    54%{transform:translateX(-111px);}
+    72%{transform:translateX(-92px);}
+    100%{transform:translateX(-100px);}
+}
+
+#boss2Card.hit{
+    animation:boss2Hit .38s ease;
+}
+
+@keyframes boss2Hit{
+    0%{transform:translateX(100px);}
+    18%{transform:translateX(85px) rotate(-1deg);}
+    36%{transform:translateX(115px) rotate(1deg);}
+    54%{transform:translateX(89px);}
+    72%{transform:translateX(108px);}
+    100%{transform:translateX(100px);}
+}
+
+.healing{
+    animation:bossHeal .75s ease;
+}
+
+@keyframes bossHeal{
+    0%{filter:brightness(1);}
+    45%{
+        filter:
+            brightness(1.5)
+            drop-shadow(0 0 22px #74ff98)
+            drop-shadow(0 0 35px #fff);
+    }
+    100%{filter:brightness(1);}
+}
+
+/* ==================== MODAL ==================== */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+    background:rgba(0,0,0,.65);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    position:relative;
+    width:min(900px,92vw);
+    max-height:90vh;
+    overflow:auto;
+    padding:30px;
+    border-radius:25px;
+    background:#fff;
+    box-shadow:0 12px 50px rgba(0,0,0,.45);
+}
+
+.modal-title{
+    margin:0 0 20px;
+    text-align:center;
+    font-size:30px;
+    font-weight:1000;
+}
+
+.close-btn{
+    position:absolute;
+    right:15px;
+    top:12px;
+    z-index:20;
+    width:50px;
+    height:50px;
+    border:0;
+    border-radius:50%;
+    background:rgba(20,20,20,.8);
+    color:#fff;
+    font-size:30px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* ==================== 說明 ==================== */
+
+#ruleModal{
+    background:rgba(0,0,0,.65);
+}
+
+#ruleModal .modal-box{
+    width:auto;
+    max-width:92vw;
+    max-height:92vh;
+    padding:0;
+    overflow:visible;
+    background:transparent;
+    border:none;
+    border-radius:0;
+    box-shadow:none;
+}
+
+#ruleModal .close-btn{
+    right:-18px;
+    top:-18px;
+}
+
+.rule-image{
+    display:block;
+    max-width:90vw;
+    max-height:88vh;
+    margin:auto;
+    object-fit:contain;
+}
+
+/* ==================== 商店 ==================== */
+
+#storeModal .modal-box{
+    width:min(1050px,94vw);
+    min-height:620px;
+    padding:210px 45px 45px;
+    background:url("store1.png") center/100% 100% no-repeat;
+    border:none;
+    box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
+
+.store-items{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+}
+
+.store-item{
+    border:3px solid rgba(255,255,255,.75);
+    border-radius:20px;
+    padding:15px 8px;
+    text-align:center;
+    background:rgba(255,255,255,.72);
+    cursor:pointer;
+    transition:.2s;
+}
+
+.store-item:hover{
+    transform:translateY(-6px);
+    border-color:#ffca45;
+    box-shadow:0 7px 20px rgba(0,0,0,.2);
+}
+
+.store-item img{
+    width:120px;
+    height:120px;
+    object-fit:contain;
+}
+
+.store-item-name{
+    margin-top:5px;
+    font-size:17px;
+    font-weight:900;
+}
+
+.price{
+    margin-top:6px;
+    color:#d56d00;
+    font-size:20px;
+    font-weight:1000;
+}
+
+/* ==================== 背包 ==================== */
+
+#bagModal .modal-box{
+    width:min(1050px,94vw);
+    min-height:620px;
+    padding:210px 45px 45px;
+    background:url("bag1.png") center/100% 100% no-repeat;
+    border:none;
+    box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
+
+.bag-items{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+}
+
+.bag-item{
+    position:relative;
+    min-height:200px;
+    border:3px solid rgba(255,255,255,.75);
+    border-radius:20px;
+    padding:15px;
+    text-align:center;
+    background:rgba(255,255,255,.72);
+}
+
+.bag-item img{
+    width:115px;
+    height:115px;
+    object-fit:contain;
+}
+
+.item-count{
+    position:absolute;
+    right:10px;
+    top:8px;
+    min-width:35px;
+    height:35px;
+    padding:5px 9px;
+    border-radius:20px;
+    background:#333;
+    color:#fff;
+    font-size:17px;
+    font-weight:900;
+}
+
+.use-item-btn{
+    margin-top:9px;
+    padding:10px 22px;
+    border:0;
+    border-radius:12px;
+    background:#ffd85b;
+    color:#333;
+    font-size:16px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.use-item-btn:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+/* ==================== 確認 ==================== */
+
+.confirm-box{
+    width:min(450px,90vw);
+    text-align:center;
+}
+
+.confirm-box img{
+    width:135px;
+    height:135px;
+    object-fit:contain;
+}
+
+.confirm-text{
+    margin:15px 0 22px;
+    font-size:19px;
+    font-weight:800;
+    line-height:1.6;
+}
+
+.confirm-actions{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+}
+
+.confirm-actions button,
+.modal-action-btn{
+    min-width:120px;
+    padding:13px 20px;
+    border:0;
+    border-radius:12px;
+    font-size:17px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.yes{
+    background:#ffd85b;
+}
+
+.no{
+    background:#ddd;
+}
+
+.target-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.target-btn{
+    padding:18px;
+    border:3px solid #ccc;
+    border-radius:15px;
+    background:rgba(255,255,255,.9);
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.target-btn:hover{
+    border-color:#ffd85b;
+}
+
+/* ==================== 護甲視窗 ==================== */
+
+#shieldTargetModal .modal-box{
+    width:min(500px,90vw);
+    background:rgba(220,220,220,.65);
+    border:2px solid rgba(255,255,255,.65);
+    box-shadow:0 12px 40px rgba(0,0,0,.3);
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+}
+
+#shieldTargetModal .target-btn{
+    background:rgba(245,245,245,.75);
+}
+
+#shieldConfirmModal .modal-box{
+    background:rgba(220,220,220,.95);
+}
+
+/* ==================== 通關 ==================== */
+
+#victory{
+    z-index:500;
+}
+
+.victory-box{
+    text-align:center;
+    overflow:hidden;
+}
+
+.victory-title{
+    font-size:55px;
+    font-weight:1000;
+    color:#ffba19;
+    text-shadow:0 3px 0 #6c3b00;
+}
+
+.victory-text{
+    font-size:24px;
+    font-weight:900;
+}
+
+.confetti{
+    position:fixed;
+    z-index:600;
+    width:12px;
+    height:22px;
+    top:-30px;
+    animation:fall linear forwards;
+    pointer-events:none;
+}
+
+@keyframes fall{
+    to{
+        transform:translateY(110vh) rotate(900deg);
+    }
+}
+
+/* ==================== 響應式 ==================== */
+
+@media(max-width:1100px){
+
+    body{
+        overflow:auto;
+    }
+
+    #game{
+        min-height:1200px;
+    }
+
+    .boss-area{
+        width:95%;
+        gap:20px;
+    }
+
+    .boss-img{
+        width:280px;
+        height:280px;
+    }
+
+    .summon-zone{
+        bottom:330px;
+        width:700px;
+    }
+
+    #pokemonImg{
+        width:300px;
+        height:300px;
+        min-width:300px;
+        min-height:300px;
+        max-width:300px;
+        max-height:300px;
+        transform:translateY(50px);
+    }
+
+    #message{
+        top:370px;
+    }
+
+    #shieldBtn img,
+    #ruleBtn img,
+    #bagBtn img,
+    #storeBtn img{
+        width:170px;
+    }
+
+    #healBtn img,
+    #attackBtn img{
+        width:180px;
+    }
+
+    #summonBtn img{
+        width:220px;
+    }
+
+    .number-input{
+        width:210px;
+        height:75px;
+        font-size:25px;
+    }
+
+    .store-items,
+    .bag-items{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div class="boss-area">
+
+        <div class="boss-card" id="boss1Card" data-boss="boss1">
+
+            <img class="boss-img" src="boss1.png" alt="尼多王">
+
+            <div class="stats">
+
+                <div class="stat-row">
+                    <span>HP</span>
+
+                    <div class="bar">
+                        <div id="boss1HpBar" class="fill hp-fill"></div>
+                    </div>
+
+                    <span id="boss1HpText">60 / 60</span>
+                </div>
+
+                <div class="stat-row">
+                    <span>護甲</span>
+
+                    <div class="bar">
+                        <div id="boss1ArmorBar" class="fill armor-fill"></div>
+                    </div>
+
+                    <span id="boss1ArmorText">10 / 10</span>
+                </div>
+
+            </div>
+
+            <div class="dead-label">擊倒</div>
+
+        </div>
+
+
+        <div class="boss-card" id="boss2Card" data-boss="boss2">
+
+            <img class="boss-img" src="boss2.png" alt="貓老大">
+
+            <div class="stats">
+
+                <div class="stat-row">
+                    <span>HP</span>
+
+                    <div class="bar">
+                        <div id="boss2HpBar" class="fill hp-fill"></div>
+                    </div>
+
+                    <span id="boss2HpText">40 / 40</span>
+                </div>
+
+                <div class="stat-row">
+                    <span>護甲</span>
+
+                    <div class="bar">
+                        <div id="boss2ArmorBar" class="fill armor-fill"></div>
+                    </div>
+
+                    <span id="boss2ArmorText">10 / 10</span>
+                </div>
+
+            </div>
+
+            <div class="dead-label">擊倒</div>
+
+        </div>
+
+    </div>
+
+
+    <div id="message">
+        請先召喚寶可夢！
+    </div>
+
+
+    <div class="left-controls" id="leftControls">
+
+        <button class="image-button" id="shieldBtn" type="button">
+            <img src="Shield.png" alt="護甲">
+        </button>
+
+        <button class="image-button" id="ruleBtn" type="button">
+            <img src="rule.png" alt="遊戲說明">
+        </button>
+
+        <div class="heal-row">
+
+            <input
+                id="healInput"
+                class="number-input"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="治療數值"
+                disabled
+            >
+
+            <button class="image-button" id="healBtn" type="button" disabled>
+                <img src="heal.png" alt="治療">
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="summon-zone">
+
+        <div class="pokemon-display">
+
+            <img id="pokemonImg" src="" alt="">
+
+            <div id="pokemonName">尚未召喚</div>
+
+            <div id="pokemonEffect"></div>
+
+        </div>
+
+        <button class="image-button" id="summonBtn" type="button">
+            <img src="roll.png" alt="召喚">
+        </button>
+
+    </div>
+
+
+    <div class="right-controls">
+
+        <button class="image-button" id="bagBtn" type="button">
+            <img src="bag.png" alt="背包">
+        </button>
+
+        <button class="image-button" id="storeBtn" type="button">
+            <img src="store.png" alt="商店">
+        </button>
+
+        <div class="attack-row">
+
+            <button class="image-button" id="attackBtn" type="button" disabled>
+                <img src="atk.png" alt="攻擊">
+            </button>
+
+            <input
+                id="damageInput"
+                class="number-input"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="傷害數值"
+                disabled
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- 說明 -->
+<div class="modal" id="ruleModal">
+    <div class="modal-box">
+
+        <button class="close-btn" data-close="ruleModal" type="button">×</button>
+
+        <img class="rule-image" src="rule1.png" alt="遊戲說明">
+
+    </div>
+</div>
+
+
+<!-- 商店 -->
+<div class="modal" id="storeModal">
+    <div class="modal-box">
+
+        <button class="close-btn" data-close="storeModal" type="button">×</button>
+
+        <div class="store-items">
+
+            <div class="store-item" data-item="armor">
+                <img src="item1.png" alt="護甲修復劑">
+                <div class="store-item-name">護甲修復劑</div>
+                <div class="price">$1000</div>
+            </div>
+
+            <div class="store-item" data-item="potion">
+                <img src="item2.png" alt="頂級生命藥水">
+                <div class="store-item-name">頂級生命藥水</div>
+                <div class="price">$1200</div>
+            </div>
+
+            <div class="store-item" data-item="revive">
+                <img src="item3.png" alt="復活藥劑">
+                <div class="store-item-name">復活藥劑</div>
+                <div class="price">$1500</div>
+            </div>
+
+            <div class="store-item" data-item="control">
+                <img src="item4.png" alt="控心術">
+                <div class="store-item-name">控心術</div>
+                <div class="price">$500</div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 背包 -->
+<div class="modal" id="bagModal">
+    <div class="modal-box">
+
+        <button class="close-btn" data-close="bagModal" type="button">×</button>
+
+        <div class="bag-items" id="bagItems"></div>
+
+    </div>
+</div>
+
+
+<!-- 確認 -->
+<div class="modal" id="confirmModal">
+    <div class="modal-box confirm-box">
+
+        <img id="confirmImg" src="" alt="">
+
+        <div class="confirm-text" id="confirmText"></div>
+
+        <div class="confirm-actions">
+            <button class="yes" id="confirmYes" type="button">確認</button>
+            <button class="no" id="confirmNo" type="button">取消</button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 道具目標 -->
+<div class="modal" id="targetModal">
+    <div class="modal-box confirm-box">
+
+        <div class="modal-title">選擇使用對象</div>
+
+        <div class="target-buttons">
+
+            <button class="target-btn" data-target="boss1" type="button">
+                尼多王
+            </button>
+
+            <button class="target-btn" data-target="boss2" type="button">
+                貓老大
+            </button>
+
+        </div>
+
+        <div style="margin-top:20px">
+
+            <button class="no modal-action-btn" id="targetCancel" type="button">
+                取消
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 護甲目標 -->
+<div class="modal" id="shieldTargetModal">
+    <div class="modal-box confirm-box">
+
+        <img src="Shield.png" alt="護甲">
+
+        <div class="modal-title">
+            選擇護甲補充對象
+        </div>
+
+        <div class="target-buttons">
+
+            <button
+                class="target-btn shield-target-btn"
+                data-shield-target="boss1"
+                type="button"
+            >
+                尼多王
+            </button>
+
+            <button
+                class="target-btn shield-target-btn"
+                data-shield-target="boss2"
+                type="button"
+            >
+                貓老大
+            </button>
+
+        </div>
+
+        <div style="margin-top:20px">
+
+            <button
+                class="no modal-action-btn"
+                id="shieldTargetCancel"
+                type="button"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 護甲確認 -->
+<div class="modal" id="shieldConfirmModal">
+    <div class="modal-box confirm-box">
+
+        <img src="Shield.png" alt="護甲">
+
+        <div class="confirm-text" id="shieldConfirmText"></div>
+
+        <div class="confirm-actions">
+
+            <button class="yes" id="shieldConfirmYes" type="button">
+                確認使用
+            </button>
+
+            <button class="no" id="shieldConfirmNo" type="button">
+                取消
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- 通關 -->
+<div class="modal" id="victory">
+    <div class="modal-box victory-box">
+
+        <div class="victory-title">
+            🎉 通關成功！ 🎉
+        </div>
+
+        <div class="victory-text">
+            兩隻 BOSS 已全部擊敗！
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+
+/* ==================== BOSS ==================== */
+
+const bosses = {
+
+    boss1:{
+        name:"尼多王",
+        hp:60,
+        maxHp:60,
+        armor:10,
+        maxArmor:10
+    },
+
+    boss2:{
+        name:"貓老大",
+        hp:40,
+        maxHp:40,
+        armor:10,
+        maxArmor:10
+    }
+
+};
+
+
+/* ==================== 寶可夢 ==================== */
+
+const pokemonList = [
+
+    {
+        name:"甲賀忍蛙 + 象牙豬",
+        img:"p1.png",
+        boss1:3,
+        boss2:1,
+        text:"尼多王 ×3｜貓老大 ×1"
+    },
+
+    {
+        name:"巨沼怪",
+        img:"p2.png",
+        boss1:2,
+        boss2:1,
+        text:"尼多王 ×2｜貓老大 ×1"
+    },
+
+    {
+        name:"胡地",
+        img:"p3.png",
+        boss1:2,
+        boss2:1,
+        text:"尼多王 ×2｜貓老大 ×1"
+    },
+
+    {
+        name:"路卡利歐 + 妙蛙種子",
+        img:"p4.png",
+        boss1:1,
+        boss2:3,
+        text:"尼多王 ×1｜貓老大 ×3"
+    },
+
+    {
+        name:"怪力",
+        img:"p5.png",
+        boss1:1,
+        boss2:2,
+        text:"尼多王 ×1｜貓老大 ×2"
+    },
+
+    {
+        name:"艾路雷朵",
+        img:"p6.png",
+        boss1:1,
+        boss2:2,
+        text:"尼多王 ×1｜貓老大 ×2"
+    },
+
+    {
+        name:"超夢",
+        img:"p7.png",
+        boss1:2,
+        boss2:2,
+        text:"尼多王 ×2｜貓老大 ×2"
+    },
+
+    {
+        name:"皮卡丘",
+        img:"p8.png",
+        boss1:1,
+        boss2:1,
+        multi:true,
+        text:"群體攻擊｜全體 ×1"
+    },
+
+    {
+        name:"伊布",
+        img:"p9.png",
+        boss1:1,
+        boss2:1,
+        breakArmor:true,
+        text:"攻擊前使全體 BOSS 護甲歸 0"
+    },
+
+    {
+        name:"可達鴨",
+        img:"p10.png",
+        boss1:1,
+        boss2:1,
+        multi:true,
+        breakArmor:true,
+        text:"群體 ×1｜攻擊前使全體護甲歸 0"
+    },
+
+    {
+        name:"胖丁",
+        img:"p11.png",
+        boss1:1,
+        boss2:1,
+        disableHeal:true,
+        text:"下一回合攻擊前，補血與護甲修復暫時無效"
+    }
+
+];
+
+
+/* ==================== 道具 ==================== */
+
+const itemData = {
+
+    armor:{
+        name:"護甲修復劑",
+        price:1000,
+        img:"item1.png",
+        description:"選擇一隻存活 BOSS，將護甲恢復至上限。"
+    },
+
+    potion:{
+        name:"頂級生命藥水",
+        price:1200,
+        img:"item2.png",
+        description:"選擇一隻存活 BOSS，恢復 10 HP，但不會超過目前 HP 上限。"
+    },
+
+    revive:{
+        name:"復活藥劑",
+        price:1500,
+        img:"item3.png",
+        description:"選擇一隻死亡 BOSS 復活。復活後 HP 為 10、HP 上限改為 10，護甲為 0，但護甲仍可補滿至 10。"
+    },
+
+    control:{
+        name:"控心術",
+        price:500,
+        img:"item4.png",
+        description:"重新召喚目前出場的寶可夢。"
+    }
+
+};
+
+
+const inventory = {
+    armor:0,
+    potion:0,
+    revive:0,
+    control:0
+};
+
+
+/* ==================== 狀態 ==================== */
+
+let currentPokemon = null;
+let selectedBoss = null;
+let summonedThisRound = false;
+let healPhase = false;
+let healBlocked = false;
+let jigglyBlockWaitingAttack = false;
+let pendingPurchase = null;
+let pendingItemUse = null;
+let gameOver = false;
+let shieldTargetBoss = null;
+
+
+/* ==================== DOM ==================== */
+
+const summonBtn = document.getElementById("summonBtn");
+const attackBtn = document.getElementById("attackBtn");
+const healBtn = document.getElementById("healBtn");
+
+const damageInput = document.getElementById("damageInput");
+const healInput = document.getElementById("healInput");
+
+const pokemonImg = document.getElementById("pokemonImg");
+const pokemonName = document.getElementById("pokemonName");
+const pokemonEffect = document.getElementById("pokemonEffect");
+
+const message = document.getElementById("message");
+const leftControls = document.getElementById("leftControls");
+
+const confirmYes = document.getElementById("confirmYes");
+
+
+/* ==================== UI ==================== */
+
+function updateBossUI(){
+
+    Object.keys(bosses).forEach(key=>{
+
+        const boss = bosses[key];
+
+        const card = document.getElementById(key+"Card");
+        const hpBar = document.getElementById(key+"HpBar");
+        const armorBar = document.getElementById(key+"ArmorBar");
+        const hpText = document.getElementById(key+"HpText");
+        const armorText = document.getElementById(key+"ArmorText");
+
+        hpBar.style.width =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    boss.hp / boss.maxHp * 100
+                )
+            ) + "%";
+
+        armorBar.style.width =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    boss.armor / boss.maxArmor * 100
+                )
+            ) + "%";
+
+        hpText.textContent =
+            boss.hp + " / " + boss.maxHp;
+
+        armorText.textContent =
+            boss.armor + " / " + boss.maxArmor;
+
+        card.classList.toggle(
+            "dead",
+            boss.hp <= 0
+        );
+
+        card.classList.toggle(
+            "selected",
+            selectedBoss === key
+        );
+
+    });
+
+}
+
+
+function setMessage(text){
+    message.textContent = text;
+}
+
+
+/* ==================== 選 BOSS ==================== */
+
+document.querySelectorAll(".boss-card").forEach(card=>{
+
+    card.addEventListener("click",()=>{
+
+        if(gameOver) return;
+
+        const key = card.dataset.boss;
+
+        if(bosses[key].hp <= 0){
+
+            setMessage(
+                bosses[key].name +
+                " 已死亡。復活需使用復活藥劑。"
+            );
+
+            return;
+        }
+
+        selectedBoss = key;
+
+        updateBossUI();
+
+        if(healPhase){
+
+            setMessage(
+                "已選擇 " +
+                bosses[key].name +
+                " 作為治療目標。"
+            );
+
+        }else if(summonedThisRound){
+
+            setMessage(
+                "已鎖定攻擊目標：" +
+                bosses[key].name
+            );
+        }
+
+    });
+
+});
+
+
+/* ==================== 召喚 ==================== */
+
+function summonPokemon(forceDifferent=false){
+
+    if(gameOver) return;
+
+    let next;
+
+    if(
+        forceDifferent &&
+        pokemonList.length > 1 &&
+        currentPokemon
+    ){
+
+        do{
+
+            next =
+                pokemonList[
+                    Math.floor(
+                        Math.random() *
+                        pokemonList.length
+                    )
+                ];
+
+        }while(next === currentPokemon);
+
+    }else{
+
+        next =
+            pokemonList[
+                Math.floor(
+                    Math.random() *
+                    pokemonList.length
+                )
+            ];
+    }
+
+    currentPokemon = next;
+
+    pokemonImg.src = currentPokemon.img;
+    pokemonImg.alt = currentPokemon.name;
+    pokemonImg.style.display = "block";
+
+    pokemonName.textContent =
+        currentPokemon.name;
+
+    pokemonEffect.textContent =
+        currentPokemon.text;
+
+    summonedThisRound = true;
+    healPhase = false;
+    selectedBoss = null;
+
+    summonBtn.disabled = true;
+
+    damageInput.disabled = false;
+    attackBtn.disabled = false;
+
+    healInput.disabled = true;
+    healBtn.disabled = true;
+
+    leftControls.classList.remove(
+        "heal-active"
+    );
+
+    setMessage(
+        "召喚成功！輸入傷害並選擇攻擊目標。"
+    );
+
+    updateBossUI();
+}
+
+
+summonBtn.addEventListener(
+    "click",
+    ()=>summonPokemon(false)
+);
+
+
+/* ==================== 傷害 ==================== */
+
+function dealDamage(
+    bossKey,
+    baseDamage,
+    multiplier
+){
+
+    const boss = bosses[bossKey];
+
+    if(boss.hp <= 0) return 0;
+
+    let damage =
+        Math.max(
+            0,
+            Math.round(
+                baseDamage * multiplier
+            )
+        );
+
+    const originalDamage = damage;
+
+    /* 先扣護甲 */
+    if(boss.armor > 0){
+
+        const armorDamage =
+            Math.min(
+                boss.armor,
+                damage
+            );
+
+        boss.armor -= armorDamage;
+        damage -= armorDamage;
+    }
+
+    /* 再扣 HP */
+    if(damage > 0){
+
+        boss.hp =
+            Math.max(
+                0,
+                boss.hp - damage
+            );
+    }
+
+    animateHit(bossKey);
+
+    return originalDamage;
+}
+
+
+/* ==================== 受傷動畫 ==================== */
+
+function animateHit(key){
+
+    const card =
+        document.getElementById(
+            key+"Card"
+        );
+
+    card.classList.remove("hit");
+
+    void card.offsetWidth;
+
+    card.classList.add("hit");
+
+    setTimeout(()=>{
+
+        card.classList.remove("hit");
+
+    },450);
+}
+
+
+/* ==================== 攻擊 ==================== */
+
+attackBtn.addEventListener(
+    "click",
+    attack
+);
+
+
+function attack(){
+
+    if(gameOver) return;
+
+    if(!currentPokemon){
+
+        setMessage(
+            "請先召喚寶可夢！"
+        );
+
+        return;
+    }
+
+    const baseDamage =
+        Number(damageInput.value);
+
+    if(
+        !Number.isFinite(baseDamage) ||
+        baseDamage <= 0
+    ){
+
+        setMessage(
+            "請輸入有效的傷害數字。"
+        );
+
+        return;
+    }
+
+    if(!selectedBoss){
+
+        setMessage(
+            "請先點選一隻 BOSS 作為攻擊目標！"
+        );
+
+        return;
+    }
+
+    if(
+        bosses[selectedBoss].hp <= 0
+    ){
+
+        setMessage(
+            "這隻 BOSS 已死亡，請選擇其他目標。"
+        );
+
+        return;
+    }
+
+    const removingOldJigglyBlock =
+        jigglyBlockWaitingAttack;
+
+    if(currentPokemon.breakArmor){
+
+        bosses.boss1.armor = 0;
+        bosses.boss2.armor = 0;
+    }
+
+    if(currentPokemon.multi){
+
+        dealDamage(
+            "boss1",
+            baseDamage,
+            currentPokemon.boss1
+        );
+
+        dealDamage(
+            "boss2",
+            baseDamage,
+            currentPokemon.boss2
+        );
+
+    }else{
+
+        dealDamage(
+            selectedBoss,
+            baseDamage,
+            currentPokemon[selectedBoss]
+        );
+    }
+
+    updateBossUI();
+
+    if(removingOldJigglyBlock){
+
+        healBlocked = false;
+        jigglyBlockWaitingAttack = false;
+    }
+
+    if(currentPokemon.disableHeal){
+
+        healBlocked = true;
+        jigglyBlockWaitingAttack = true;
+    }
+
+    damageInput.value = "";
+    damageInput.disabled = true;
+    attackBtn.disabled = true;
+
+    summonedThisRound = false;
+    summonBtn.disabled = false;
+
+    selectedBoss = null;
+    healPhase = true;
+
+    if(healBlocked){
+
+        healInput.disabled = true;
+        healBtn.disabled = true;
+
+        leftControls.classList.remove(
+            "heal-active"
+        );
+
+        setMessage(
+            "胖丁技能生效！補血與護甲修復暫時無效，直到下一回合攻擊完成。"
+        );
+
+    }else{
+
+        healInput.disabled = false;
+        healBtn.disabled = false;
+
+        leftControls.classList.add(
+            "heal-active"
+        );
+
+        setMessage(
+            "攻擊完成！現在可選擇 BOSS 進行治療，或直接召喚進入下一回合。"
+        );
+    }
+
+    updateBossUI();
+
+    checkVictory();
+}
+
+
+/* ==================== 治療 ==================== */
+
+healBtn.addEventListener(
+    "click",
+    healBoss
+);
+
+
+function healBoss(){
+
+    if(!healPhase){
+
+        setMessage(
+            "目前不是治療階段。"
+        );
+
+        return;
+    }
+
+    if(healBlocked){
+
+        setMessage(
+            "胖丁技能影響中，治療暫時無效！"
+        );
+
+        return;
+    }
+
+    if(!selectedBoss){
+
+        setMessage(
+            "請先點選需要治療的 BOSS。"
+        );
+
+        return;
+    }
+
+    const boss = bosses[selectedBoss];
+
+    if(boss.hp <= 0){
+
+        setMessage(
+            "死亡 BOSS 無法直接治療，請使用復活藥劑。"
+        );
+
+        return;
+    }
+
+    const amount =
+        Number(healInput.value);
+
+    if(
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ){
+
+        setMessage(
+            "請輸入有效的治療數字。"
+        );
+
+        return;
+    }
+
+    const before = boss.hp;
+
+    /*
+        復活後 maxHp 已經變成 10，
+        因此普通治療也無法超過 10。
+    */
+    boss.hp =
+        Math.min(
+            boss.maxHp,
+            boss.hp + Math.round(amount)
+        );
+
+    const healed =
+        boss.hp - before;
+
+    healInput.value = "";
+
+    animateHeal(selectedBoss);
+
+    updateBossUI();
+
+    if(healed === 0){
+
+        setMessage(
+            boss.name +
+            " 的 HP 已達目前上限 " +
+            boss.maxHp +
+            "。"
+        );
+
+    }else{
+
+        setMessage(
+            boss.name +
+            " 恢復了 " +
+            healed +
+            " HP！"
+        );
+    }
+}
+
+
+/* ==================== 發光 ==================== */
+
+function animateHeal(key){
+
+    const card =
+        document.getElementById(
+            key+"Card"
+        );
+
+    card.classList.remove("healing");
+
+    void card.offsetWidth;
+
+    card.classList.add("healing");
+
+    setTimeout(()=>{
+
+        card.classList.remove("healing");
+
+    },800);
+}
+
+
+/* ==================== 說明 ==================== */
+
+document
+.getElementById("ruleBtn")
+.addEventListener("click",()=>{
+
+    openModal("ruleModal");
+
+});
+
+
+/* ==================== 護甲功能 ==================== */
+
+document
+.getElementById("shieldBtn")
+.addEventListener("click",()=>{
+
+    if(gameOver){
+
+        setMessage(
+            "遊戲已經通關。"
+        );
+
+        return;
+    }
+
+    openModal(
+        "shieldTargetModal"
+    );
+
+});
+
+
+document
+.querySelectorAll(
+    ".shield-target-btn"
+)
+.forEach(btn=>{
+
+    btn.addEventListener(
+        "click",
+        ()=>{
+
+            const bossKey =
+                btn.dataset.shieldTarget;
+
+            const boss =
+                bosses[bossKey];
+
+            if(boss.hp <= 0){
+
+                setMessage(
+                    boss.name +
+                    " 已死亡，無法補充護甲。"
+                );
+
+                closeModal(
+                    "shieldTargetModal"
+                );
+
+                return;
+            }
+
+            if(
+                boss.armor >=
+                boss.maxArmor
+            ){
+
+                setMessage(
+                    boss.name +
+                    " 的護甲已經是滿值。"
+                );
+
+                closeModal(
+                    "shieldTargetModal"
+                );
+
+                return;
+            }
+
+            shieldTargetBoss =
+                bossKey;
+
+            closeModal(
+                "shieldTargetModal"
+            );
+
+            document
+                .getElementById(
+                    "shieldConfirmText"
+                )
+                .innerHTML =
+
+                "確定要替 <b>" +
+                boss.name +
+                "</b> 補滿護甲嗎？" +
+
+                "<br><br>目前護甲：" +
+                boss.armor +
+                " / " +
+                boss.maxArmor +
+
+                "<br>使用後護甲：" +
+                boss.maxArmor +
+                " / " +
+                boss.maxArmor;
+
+            openModal(
+                "shieldConfirmModal"
+            );
+
+        }
+    );
+
+});
+
+
+document
+.getElementById(
+    "shieldConfirmYes"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        if(!shieldTargetBoss)
+            return;
+
+        const boss =
+            bosses[
+                shieldTargetBoss
+            ];
+
+        if(boss.hp <= 0){
+
+            closeModal(
+                "shieldConfirmModal"
+            );
+
+            shieldTargetBoss = null;
+
+            setMessage(
+                "此 BOSS 已死亡，無法補充護甲。"
+            );
+
+            return;
+        }
+
+        if(healBlocked){
+
+            closeModal(
+                "shieldConfirmModal"
+            );
+
+            shieldTargetBoss = null;
+
+            setMessage(
+                "胖丁技能影響中，護甲補充暫時無效！"
+            );
+
+            return;
+        }
+
+        /*
+            復活後 maxArmor 不會改變，
+            因此仍然可以補回 10 / 10。
+        */
+        boss.armor =
+            boss.maxArmor;
+
+        animateHeal(
+            shieldTargetBoss
+        );
+
+        updateBossUI();
+
+        setMessage(
+            boss.name +
+            " 的護甲已補滿至 " +
+            boss.maxArmor +
+            "！"
+        );
+
+        closeModal(
+            "shieldConfirmModal"
+        );
+
+        shieldTargetBoss = null;
+
+    }
+);
+
+
+document
+.getElementById(
+    "shieldConfirmNo"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        shieldTargetBoss = null;
+
+        closeModal(
+            "shieldConfirmModal"
+        );
+
+    }
+);
+
+
+document
+.getElementById(
+    "shieldTargetCancel"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        shieldTargetBoss = null;
+
+        closeModal(
+            "shieldTargetModal"
+        );
+
+    }
+);
+
+
+/* ==================== 商店 ==================== */
+
+document
+.getElementById("storeBtn")
+.addEventListener("click",()=>{
+
+    openModal("storeModal");
+
+});
+
+
+document
+.querySelectorAll(".store-item")
+.forEach(el=>{
+
+    el.addEventListener("click",()=>{
+
+        const key =
+            el.dataset.item;
+
+        const item =
+            itemData[key];
+
+        pendingPurchase = key;
+        pendingItemUse = null;
+
+        confirmYes.dataset.mode =
+            "purchase";
+
+        document
+            .getElementById(
+                "confirmImg"
+            )
+            .src =
+                item.img;
+
+        document
+            .getElementById(
+                "confirmText"
+            )
+            .innerHTML =
+
+            "確定購買 <b>" +
+            item.name +
+            "</b> 嗎？<br>" +
+            "價格：$" +
+            item.price;
+
+        openModal(
+            "confirmModal"
+        );
+
+    });
+
+});
+
+
+/* ==================== 確認 ==================== */
+
+confirmYes.addEventListener(
+    "click",
+    ()=>{
+
+        const mode =
+            confirmYes.dataset.mode;
+
+        if(mode === "purchase"){
+
+            if(!pendingPurchase)
+                return;
+
+            const key =
+                pendingPurchase;
+
+            const item =
+                itemData[key];
+
+            inventory[key]++;
+
+            pendingPurchase = null;
+
+            confirmYes.dataset.mode =
+                "";
+
+            closeModal(
+                "confirmModal"
+            );
+
+            renderBag();
+
+            setMessage(
+                "已購買 " +
+                item.name +
+                "，道具已放入背包！"
+            );
+
+            return;
+        }
+
+        if(mode === "item"){
+
+            const key =
+                pendingItemUse;
+
+            closeModal(
+                "confirmModal"
+            );
+
+            confirmYes.dataset.mode =
+                "";
+
+            if(!key) return;
+
+            if(key === "control"){
+
+                pendingItemUse = null;
+
+                useControlItem();
+
+                return;
+            }
+
+            openTargetSelection(key);
+        }
+
+    }
+);
+
+
+document
+.getElementById("confirmNo")
+.addEventListener("click",()=>{
+
+    pendingPurchase = null;
+    pendingItemUse = null;
+
+    confirmYes.dataset.mode = "";
+
+    closeModal(
+        "confirmModal"
+    );
+
+});
+
+
+/* ==================== 背包 ==================== */
+
+document
+.getElementById("bagBtn")
+.addEventListener("click",()=>{
+
+    renderBag();
+
+    openModal("bagModal");
+
+});
+
+
+function renderBag(){
+
+    const container =
+        document.getElementById(
+            "bagItems"
+        );
+
+    container.innerHTML = "";
+
+    Object.keys(itemData)
+    .forEach(key=>{
+
+        const item =
+            itemData[key];
+
+        const count =
+            inventory[key];
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+        div.className =
+            "bag-item";
+
+        div.innerHTML = `
+
+            <div class="item-count">
+                ×${count}
+            </div>
+
+            <img
+                src="${item.img}"
+                alt="${item.name}"
+            >
+
+            <div class="store-item-name">
+                ${item.name}
+            </div>
+
+            <button
+                class="use-item-btn"
+                data-use="${key}"
+                ${count <= 0 ? "disabled" : ""}
+            >
+                使用
+            </button>
+        `;
+
+        container.appendChild(
+            div
+        );
+
+    });
+
+    container
+        .querySelectorAll(
+            "[data-use]"
+        )
+        .forEach(btn=>{
+
+            btn.addEventListener(
+                "click",
+                ()=>{
+
+                    requestUseItem(
+                        btn.dataset.use
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+/* ==================== 使用道具 ==================== */
+
+function requestUseItem(key){
+
+    if(inventory[key] <= 0)
+        return;
+
+    const item =
+        itemData[key];
+
+    closeModal(
+        "bagModal"
+    );
+
+    if(
+        key === "control" &&
+        !currentPokemon
+    ){
+
+        setMessage(
+            "目前沒有出場寶可夢，無法使用控心術。"
+        );
+
+        return;
+    }
+
+    pendingItemUse = key;
+    pendingPurchase = null;
+
+    confirmYes.dataset.mode =
+        "item";
+
+    document
+        .getElementById(
+            "confirmImg"
+        )
+        .src =
+            item.img;
+
+    document
+        .getElementById(
+            "confirmText"
+        )
+        .innerHTML =
+
+        "確定使用 <b>" +
+        item.name +
+        "</b> 嗎？<br>" +
+        item.description;
+
+    openModal(
+        "confirmModal"
+    );
+
+}
+
+
+function openTargetSelection(
+    itemKey
+){
+
+    pendingItemUse =
+        itemKey;
+
+    openModal(
+        "targetModal"
+    );
+
+}
+
+
+document
+.querySelectorAll(
+    "#targetModal .target-btn"
+)
+.forEach(btn=>{
+
+    btn.addEventListener(
+        "click",
+        ()=>{
+
+            useItemOnBoss(
+                pendingItemUse,
+                btn.dataset.target
+            );
+
+        }
+    );
+
+});
+
+
+document
+.getElementById(
+    "targetCancel"
+)
+.addEventListener(
+    "click",
+    ()=>{
+
+        pendingItemUse = null;
+
+        closeModal(
+            "targetModal"
+        );
+
+    }
+);
+
+
+/* ==================== 道具效果 ==================== */
+
+function useItemOnBoss(
+    itemKey,
+    bossKey
+){
+
+    if(!itemKey)
+        return;
+
+    const boss =
+        bosses[bossKey];
+
+    /* ====================
+       護甲修復劑
+       ==================== */
+
+    if(itemKey === "armor"){
+
+        if(healBlocked){
+
+            closeModal(
+                "targetModal"
+            );
+
+            pendingItemUse = null;
+
+            setMessage(
+                "胖丁技能影響中，護甲修復暫時無效！道具未消耗。"
+            );
+
+            return;
+        }
+
+        if(boss.hp <= 0){
+
+            setMessage(
+                "死亡 BOSS 無法使用護甲修復劑。"
+            );
+
+            return;
+        }
+
+        if(
+            boss.armor >=
+            boss.maxArmor
+        ){
+
+            setMessage(
+                boss.name +
+                " 的護甲已經是滿值。"
+            );
+
+            return;
+        }
+
+        /*
+            即使 BOSS 曾被復活，
+            maxArmor 仍然是 10。
+        */
+        boss.armor =
+            boss.maxArmor;
+
+        inventory.armor--;
+
+        animateHeal(bossKey);
+
+        setMessage(
+            boss.name +
+            " 的護甲已恢復至 " +
+            boss.maxArmor +
+            "！"
+        );
+
+    }
+
+
+    /* ====================
+       頂級生命藥水
+       ==================== */
+
+    else if(itemKey === "potion"){
+
+        if(healBlocked){
+
+            closeModal(
+                "targetModal"
+            );
+
+            pendingItemUse = null;
+
+            setMessage(
+                "胖丁技能影響中，補血道具暫時無效！道具未消耗。"
+            );
+
+            return;
+        }
+
+        if(boss.hp <= 0){
+
+            setMessage(
+                "死亡 BOSS 無法使用生命藥水。"
+            );
+
+            return;
+        }
+
+        if(
+            boss.hp >=
+            boss.maxHp
+        ){
+
+            setMessage(
+                boss.name +
+                " 的 HP 已達目前上限 " +
+                boss.maxHp +
+                "。"
+            );
+
+            return;
+        }
+
+        const before =
+            boss.hp;
+
+        /*
+            如果 BOSS 已被復活，
+            maxHp 會是 10，
+            因此藥水也不能補超過 10。
+        */
+        boss.hp =
+            Math.min(
+                boss.maxHp,
+                boss.hp + 10
+            );
+
+        const healed =
+            boss.hp - before;
+
+        inventory.potion--;
+
+        animateHeal(bossKey);
+
+        setMessage(
+            boss.name +
+            " 恢復 " +
+            healed +
+            " HP！"
+        );
+
+    }
+
+
+    /* ====================
+       復活藥劑
+       ==================== */
+
+    else if(itemKey === "revive"){
+
+        if(boss.hp > 0){
+
+            setMessage(
+                "復活藥劑只能對已死亡的 BOSS 使用。"
+            );
+
+            return;
+        }
+
+        /*
+            ★ 新復活規則 ★
+
+            復活後：
+            HP = 10
+            HP 上限 = 10
+            護甲 = 0
+            護甲上限仍維持 10
+
+            所以之後：
+            治療最高只能到 10 HP
+            護甲則可以重新補到 10
+        */
+
+        boss.maxHp = 10;
+        boss.hp = 10;
+
+        boss.armor = 0;
+
+        /* 不修改 boss.maxArmor */
+
+        inventory.revive--;
+
+        gameOver = false;
+
+        animateHeal(bossKey);
+
+        setMessage(
+            boss.name +
+            " 已復活！HP 10 / 10，護甲 0 / " +
+            boss.maxArmor +
+            "。"
+        );
+
+    }
+
+
+    updateBossUI();
+
+    renderBag();
+
+    closeModal(
+        "targetModal"
+    );
+
+    pendingItemUse = null;
+
+}
+
+
+/* ==================== 控心術 ==================== */
+
+function useControlItem(){
+
+    if(
+        inventory.control <= 0
+    )
+        return;
+
+    if(!currentPokemon){
+
+        setMessage(
+            "目前沒有出場寶可夢。"
+        );
+
+        return;
+    }
+
+    inventory.control--;
+
+    summonPokemon(true);
+
+    summonBtn.disabled = true;
+
+    renderBag();
+
+    setMessage(
+        "控心術發動！已重新召喚出場寶可夢！"
+    );
+
+}
+
+
+/* ==================== MODAL ==================== */
+
+function openModal(id){
+
+    document
+        .getElementById(id)
+        .classList.add("show");
+
+}
+
+
+function closeModal(id){
+
+    document
+        .getElementById(id)
+        .classList.remove("show");
+
+}
+
+
+document
+.querySelectorAll("[data-close]")
+.forEach(btn=>{
+
+    btn.addEventListener(
+        "click",
+        ()=>{
+
+            closeModal(
+                btn.dataset.close
+            );
+
+        }
+    );
+
+});
+
+
+document
+.querySelectorAll(
+    "#ruleModal,#storeModal,#bagModal"
+)
+.forEach(modal=>{
+
+    modal.addEventListener(
+        "click",
+        e=>{
+
+            if(e.target === modal){
+
+                modal.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+});
+
+
+/* ==================== 通關 ==================== */
+
+function checkVictory(){
+
+    if(
+        bosses.boss1.hp <= 0 &&
+        bosses.boss2.hp <= 0
+    ){
+
+        gameOver = true;
+
+        summonBtn.disabled = true;
+        attackBtn.disabled = true;
+        damageInput.disabled = true;
+
+        healBtn.disabled = true;
+        healInput.disabled = true;
+
+        leftControls.classList.remove(
+            "heal-active"
+        );
+
+        setTimeout(()=>{
+
+            openModal(
+                "victory"
+            );
+
+            createConfetti();
+
+        },600);
+    }
+}
+
+
+/* ==================== 彩帶 ==================== */
+
+function createConfetti(){
+
+    const colors = [
+        "#ff4f70",
+        "#ffd84d",
+        "#57d7ff",
+        "#8cff75",
+        "#b56cff",
+        "#ff983d"
+    ];
+
+    for(let i=0;i<120;i++){
+
+        const piece =
+            document.createElement(
+                "div"
+            );
+
+        piece.className =
+            "confetti";
+
+        piece.style.left =
+            Math.random()*100 +
+            "vw";
+
+        piece.style.background =
+            colors[
+                Math.floor(
+                    Math.random() *
+                    colors.length
+                )
+            ];
+
+        piece.style.animationDuration =
+            (
+                2.5 +
+                Math.random()*3
+            ) + "s";
+
+        piece.style.animationDelay =
+            (
+                Math.random()*.8
+            ) + "s";
+
+        document.body.appendChild(
+            piece
+        );
+
+        setTimeout(()=>{
+
+            piece.remove();
+
+        },6500);
+    }
+}
+
+
+/* ==================== 初始化 ==================== */
+
+updateBossUI();
+renderBag();
+
+</script>
+
+</body>
+</html>
